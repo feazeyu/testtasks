@@ -24,18 +24,18 @@ function coordsWithDistFrom(middle, dist) {
   let dR = dist;
   let coords = [];
   while (dQ < dist) {
-    coords.push(Coords(middle.Q + dQ, middle.R + dR));
-    coords.push(Coords(middle.Q - dQ, middle.R - dR));
+    coords.push(new Coords(middle.Q + dQ, middle.R + dR));
+    coords.push(new Coords(middle.Q - dQ, middle.R - dR));
     dQ++;
   }
   while (dR > 0) {
-    coords.push(Coords(middle.Q + dQ, middle.R + dR));
-    coords.push(Coords(middle.Q - dQ, middle.R - dR));
+    coords.push(new Coords(middle.Q + dQ, middle.R + dR));
+    coords.push(new Coords(middle.Q - dQ, middle.R - dR));
     dR--;
   }
   while (dQ > 0) {
-    coords.push(Coords(middle.Q + dQ, middle.R + dR));
-    coords.push(Coords(middle.Q - dQ, middle.R - dR));
+    coords.push(new Coords(middle.Q + dQ, middle.R + dR));
+    coords.push(new Coords(middle.Q - dQ, middle.R - dR));
     dQ--;
     dR--;
   }
@@ -53,6 +53,46 @@ function coordsWithinRadius(middle, radius) {
   return coords;
 }
 
+function runTests(){
+    //distance tests
+    let A = Coords(-83, 130); //Next Gen distro
+    let B = Coords(-66, 192); //Corner stalker
+    let C = Coords(-65, 123); //No2 (Baika)
+
+    let distAB = 79; //values from SB client
+    let distAC = 18;
+    let distBC = 69;
+
+    distTest(A, B, distAB);
+    distTest(A, C, distAC);
+    distTest(B, C, distBC);
+
+    //coords with dist from tests
+    coordsWithDistFromTest(A, 2);
+    coordsWithDistFromTest(B, 5);
+    coordsWithDistFromTest(C, 1);
+    coordsWithDistFromTest(A, 7);
+    coordsWithDistFromTest(B, 3);
+    coordsWithDistFromTest(C, 10);
+}
+
+function coordsWithDistFromTest(M, dist){
+    let output = coordsWithDistFrom(M, dist);
+    if(output.length != 6*dist){
+        throw "wrong output length, expected: " + (6*dist) + " got: " + output.length;
+    }
+    for(let i = 0; i < output.length; i++){
+        distTest(M, output[i], dist);
+    }
+}
+
+function distTest(A, B, expectedDist){
+    if(expectedDist != distance(A, B)){
+        throw "dist test expected: " + expectedDist + " got: " + distance(A, B);
+    }
+}
+
 exports.distance = distance;
 exports.Coords = Coords;
 exports.coordsWithinRadius = coordsWithinRadius;
+exports.runTests = runTests;
