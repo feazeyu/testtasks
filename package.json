@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/Chobo666/ParrotAdvisor/issues"
   },
-  "homepage": "https://github.com/Chobo666/ParrotAdvisor#readme"
+  "homepage": "https://github.com/Chobo666/ParrotAdvisor#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  }
 }
