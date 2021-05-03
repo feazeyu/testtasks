@@ -3,6 +3,7 @@ const fs = require("fs");
 const hexMath = require("./hexMath");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
+var channel;
 const emoji = { 
   crystal: "<:Crystal:757976643363930122>",
   metal:"<:Metal:757976643493953688>",
@@ -12,6 +13,7 @@ var map;
 var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
+client.login(token);
 const prefix = "p!";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
 function tooBigRadiusError(radius){
@@ -30,6 +32,7 @@ function initCellDefinitionDict() {
 initCellDefinitionDict();
 client.once("ready", () => {
   console.log("Ready!");
+  channel = client.channels.cache.get("838491827400212513");
 });
 
 class Hex {
@@ -52,7 +55,8 @@ client.on("message", (message) => {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss":
-          harvest = bestTotalSpots(rssAt, new hexMath.Coords(args[2], args[3]), args[4], args[5])
+          harvest = bestTotalSpots(rssAt, new hexMath.Coords(args[2], args[3]), args[4], args[5], args[6])
+          //TODO Osetrit crashe pri nezadani argumentu
           if(parseInt(args[4]) > 10){
             message.channel.send(
               tooBigRadiusError(parseInt(args[4]))
@@ -60,7 +64,10 @@ client.on("message", (message) => {
             break;
           }
          var temp = [];
-         for(x = 0;x < 10; x++){
+         if(args[6] == undefined){
+           args[6] = 10
+         }
+         for(x = 0;x < args[6]; x++){
            temp.push({name:x+1+". " + harvest[x].coords.gotoCoords(), value: harvest[x].LQ + "<:Salute1:786442517209415710> " + harvest[x].MR + "<:Metal:757976643493953688> " +harvest[x].GR + "<:Gas:757976643204546618> " + harvest[x].CR + "<:Crystal:757976643363930122>" + " | Total: " + harvest[x].total + " | Distance: " + harvest[x].dist})
           
         }
@@ -71,7 +78,12 @@ client.on("message", (message) => {
             .addFields(
               temp
          )
-          message.channel.send(msg);
+          message.channel.send(msg).then(() =>
+            channel.messages.fetch({ limit: 1 }).then(messages => {
+            let lastMessage = messages.first();
+              lastMessage.react('◀️').then(() => lastMessage.react('▶️'));
+              //TODO Strankovani pres reakce
+          }));
           break;
         case "labor":
           harvest = laborAt(
@@ -94,6 +106,7 @@ client.on("message", (message) => {
               " Total: " +
               harvest.total +
               "```"
+              //TODO pekne vypisovani i pro jine prikazy nez je p! rss
           );
           break;
         case "planets":
@@ -175,7 +188,7 @@ client.on("message", (message) => {
             );
           }
           break;
-        case "ships":
+        case "ships": //TODO Vice lodi, spravne delanou redukci pro light ships
           if (args[2] != undefined && args[3] != undefined) {
             message.channel.send(calculateShips(args[2], args[3]));
           } else if (args[2] != undefined) {
@@ -200,7 +213,7 @@ client.on("message", (message) => {
       );
     }*/
 });
-client.login(token);
+
 loadMap("./resources/map.json");
 function loadMap(path) {
   let data = "";
@@ -280,8 +293,7 @@ function comparatorTotal(a, b){
   return b.total - a.total;
 }
 
-function bestTotalSpots(fnc, middle, radius, distance){
-  let entries =10;
+function bestTotalSpots(fnc, middle, radius, distance, entries = 50){
   let spots = [];
   let coordsArray = hexMath.coordsWithinRadius(middle, distance);
   for (i in coordsArray) {
