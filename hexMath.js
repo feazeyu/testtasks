@@ -5,6 +5,9 @@ class Coords {
     this.Q = Q;
     this.R = R;
   }
+  gotoCoords(){
+    return "/goto " + this.Q + " " + this.R;
+  }
 }
 
 function distance(A, B) {
