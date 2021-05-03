@@ -48,7 +48,8 @@ function coordsWithinRadius(middle, radius) {
   }
   coords = [];
   for (let dist = radius; dist >= 1; dist--) {
-    coords.concat(coordsWithDistFrom(middle, dist));
+    //console.log("Hexmath: " + coordsWithDistFrom(middle, dist).length);
+    coords = coords.concat(coordsWithDistFrom(middle, dist));
   }
   return coords;
 }

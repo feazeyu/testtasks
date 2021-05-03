@@ -27,15 +27,24 @@ class Hex {
       if(this.type == '3'){
           this.size = CellDefinitionsDict[this.id].Size;
       }
-      this.HarvestValue= CellDefinitionsDict[this.id].HarvestValue;
+      this.HarvestValue = CellDefinitionsDict[this.id].HarvestValue;
   }
 }
 client.on("message", (message) => {
   let args = message.content.split(" ");
   if (args[0] == prefix) {
-    try {
+    //try {
       if (args.length > 1) {
         switch (args[1].toLowerCase()) {
+          case "rss": 
+            let harvest = rssWithinRadius(new hexMath.Coords(parseInt(args[2]), parseInt(args[3])), parseInt(args[4]), ['1','2','3']);
+            message.channel.send(
+                "``` Labor: " + harvest.LQ + " \n" +
+                " Metal: " + harvest.MR + " \n" +
+                " Gas: " + harvest.GR + " \n" +
+                " Crystal: " + harvest.CR + "```"
+            );
+          break;
           case "dist":
             if (
               args[2] != undefined &&
@@ -84,13 +93,13 @@ client.on("message", (message) => {
       } else {
         message.channel.send(unknownCommandErr);
       }
-    } catch (e) {
+    /*} catch (e) {
       message.channel.send(
         "```No joke, don't do that again. Please send this error to feazeyu#9566" +
           "\n" +
           e + "```"
       );
-    }
+    }*/
   }
 });
 client.login(token);
@@ -120,6 +129,7 @@ function readHex(q, r) {
 if(Math.abs(q)> map.MapRadius || Math.abs(r)>map.MapRadius){
     return new Hex(q, r, 0);
 }
+console.log("Q: " + q + " R: " + r);
   return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
 }
 function calculateShips(shipType, moonPts = 0) {
@@ -160,11 +170,15 @@ function rssWithinRadius(middle, radius, types){
     "GR": 0,
     "CR": 0
   }
-  for(coords in hexMath.coordsWithinRadius(middle, radius)){
-    let hex = readHexCoords(coords);
-    if(types.include(hex.type)){
+  //console.log("Cords with rad: " + hexMath.coordsWithinRadius(middle, radius));
+  let coordsArray = hexMath.coordsWithinRadius(middle, radius);
+  for(i in coordsArray){
+    let hex = readHexCoords(coordsArray[i]);
+    console.log(hex);
+    if(types.includes(hex.type)){
+        console.log("Did it :>")
       for(key in hex.HarvestValue){
-        HarvestValue[key] += hex.HarvestValue[key];
+        HarvestValue[key] += parseInt(hex.HarvestValue[key]);
       }
     }
   }
