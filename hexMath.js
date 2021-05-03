@@ -9,7 +9,7 @@ class Coords {
 
 function distance(A, B) {
   //hexes -> their distance
-  if ((A.Q - B.Q) * (A.R - B.R) >= 0 - eps) {
+  if ((A.Q - B.Q) * (A.R - B.R) <= 0 + eps) {
     return Math.max(Math.abs(A.Q - B.Q), Math.abs(A.R - B.R));
   } else {
     return Math.abs(A.Q - B.Q) + abs(A.R - B.R);
@@ -23,20 +23,20 @@ function coordsWithDistFrom(middle, dist) {
   let dQ = 0;
   let dR = dist;
   let coords = [];
-  while (dQ < dist) {
+  while (dQ > -dist) {
     coords.push(new Coords(middle.Q + dQ, middle.R + dR));
     coords.push(new Coords(middle.Q - dQ, middle.R - dR));
-    dQ++;
+    dQ--;
   }
   while (dR > 0) {
     coords.push(new Coords(middle.Q + dQ, middle.R + dR));
     coords.push(new Coords(middle.Q - dQ, middle.R - dR));
     dR--;
   }
-  while (dQ > 0) {
+  while (dQ < 0) {
     coords.push(new Coords(middle.Q + dQ, middle.R + dR));
     coords.push(new Coords(middle.Q - dQ, middle.R - dR));
-    dQ--;
+    dQ++;
     dR--;
   }
   return coords;
