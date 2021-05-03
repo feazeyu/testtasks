@@ -2,6 +2,8 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const hexMath = require("./hexMath");
 const { parse } = require("url");
+const unitPlanner = require("./unitPlanner");
+console.log(unitPlanner.ships);
 var map;
 var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
@@ -22,20 +24,6 @@ initCellDefinitionDict();
 client.once("ready", () => {
   console.log("Ready!");
 });
-const exampleEmbed = new Discord.MessageEmbed()
-  .setColor("#0099ff")
-  .setTitle("Some title")
-  .setURL("https://discord.js.org/")
-  .setAuthor(
-    "Some name",
-    "https://i.imgur.com/wSTFkRM.png",
-    "https://discord.js.org"
-  )
-  .setDescription("Some description here")
-  .setThumbnail("https://i.imgur.com/wSTFkRM.png")
-  .setImage("https://i.imgur.com/wSTFkRM.png")
-  .setTimestamp()
-  .setFooter("Some footer text here", "https://i.imgur.com/wSTFkRM.png");
 
 class Hex {
   constructor(Q, R, id) {
@@ -99,6 +87,7 @@ client.on("message", (message) => {
             );
           }
           break;
+        case "yo": message.channel.send(exampleEmbed);break;
         case "hex":
           if (args[2] != undefined && args[3] != undefined) {
             let hex = readHex(args[2], args[3]);
@@ -170,22 +159,32 @@ function readHex(q, r) {
 }
 function calculateShips(shipType, moonPts = 0) {
   let shipId = NaN;
-  for (x = 0; x < ships.length; x++) {
-    if (ships[x].name == shipType.toLowerCase()) {
+  for (x = 0; x < unitPlanner.ships.length; x++) {
+    if (unitPlanner.ships[x].name == shipType.toLowerCase()) {
       shipId = x;
       console.log("Found a ship :>");
     }
   }
   let shipsPerHour = parseFloat(
-    (60 / (ships[shipId].time * (0.5 - (moonPts * 5) / 100))).toFixed(1)
+    (60 / (unitPlanner.ships[shipId].time * (0.5 - (moonPts * 5) / 100))).toFixed(1)
   );
   let rssPerHour = {
-    crystal: shipsPerHour * ships[shipId].crystal,
-    gas: shipsPerHour * ships[shipId].gas,
-    metal: shipsPerHour * ships[shipId].metal,
+    crystal: shipsPerHour * unitPlanner.ships[shipId].crystal,
+    gas: shipsPerHour * unitPlanner.ships[shipId].gas,
+    metal: shipsPerHour * unitPlanner.ships[shipId].metal,
   };
-  return (
-    "```You'll make: " +
+  let shipProduction = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle('Ship production: ' + shipsPerHour + " " + shipType + " per hour.")
+	.setDescription('Ship production with maxed out HSA and mic offices.')
+  .addFields(
+    {name:'Metal usage', value: Math.floor(rssPerHour.metal), inline:true},
+    {name:'Gas usage', value:Math.floor(rssPerHour.gas), inline:true},
+    {name:'Crystal usage', value:Math.floor(rssPerHour.crystal), inline:true}
+  )
+	.setTimestamp()
+  return (shipProduction
+    /*"```You'll make: " +
     shipsPerHour +
     " " +
     shipType +
@@ -195,8 +194,9 @@ function calculateShips(shipType, moonPts = 0) {
     Math.floor(rssPerHour.gas) +
     " gas/h \n" +
     Math.floor(rssPerHour.crystal) +
-    " crystals/h ```"
+    " crystals/h ```"*/
   );
+  
 }
 
 function rssAt(coords, radius) {
@@ -311,7 +311,4 @@ function rssWithinRadius(middle, radius, types) {
 }
 
 var testHex = new Hex(10, 10, 303);
-console.log(testHex.HarvestValue.LQ);
-console.log(testHex.type);
-console.log(testHex.size);
 hexMath.runTests();

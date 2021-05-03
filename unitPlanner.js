@@ -23,3 +23,4 @@ const ships = [
         crystal:143
     }
     ]
+    exports.ships = ships;
