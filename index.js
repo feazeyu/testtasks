@@ -7,8 +7,7 @@ var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
 const prefix = "p!";
-const unknownCommandErr = "Unrecognized command! Squawk!"; //Error for unknown command
-const ships = [{name:"destroyer", time:10.5, metal:358, gas:215, crystal:143}]
+const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
 const CellDefinitions = JSON.parse(fs.readFileSync("./resources/CELL_DEFINITIONS.json"));
 var CellDefinitionsDict = {};
 function initCellDefinitionDict(){
@@ -44,7 +43,7 @@ client.on("message", (message) => {
               message.channel.send(hexMath.distance(A, B));
             } else {
               message.channel.send(
-                "Wrrong command usage! \nThe correct one is: p! dist x1 y1 x2 y2"
+                "```Wrrong command usage! \nThe correct one is: p! dist x1 y1 x2 y2```"
               );
             }
             break;
@@ -54,7 +53,7 @@ client.on("message", (message) => {
               message.channel.send("Hex: " + hex);
             } else {
               message.channel.send(
-                "Wrrong command usage! \nThe correct one is: p! hex x y"
+                "```Wrrong command usage! \nThe correct one is: p! hex x y```"
               );
             }
             break;
@@ -64,7 +63,7 @@ client.on("message", (message) => {
             } else if (args[2] != undefined) {
              message.client.send(calculateShips(args[2]));
             } else {
-              message.channel.send("Gimme arrguments, landlubber!");
+              message.channel.send("```Gimme arrguments, landlubber!```");
             }
             break;
           default:
@@ -76,9 +75,9 @@ client.on("message", (message) => {
       }
     } catch (e) {
       message.channel.send(
-        "No joke, don't do that again. Please send this error to feazeyu#9566" +
+        "```No joke, don't do that again. Please send this error to feazeyu#9566" +
           "\n" +
-          e
+          e + "```"
       );
     }
   }
@@ -154,4 +153,4 @@ var testHex = new Hex(10, 10, 303);
 console.log(testHex.HarvestValue.LQ);
 console.log(testHex.type);
 console.log(testHex.size);
-//hexMath.runTests();
+hexMath.runTests();
