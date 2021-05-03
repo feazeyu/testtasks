@@ -8,18 +8,18 @@ const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString(); 
 const prefix = 'p!';
 const unknownCommandErr = "Unrecognized command! Squawk!"; //Error for unknown command
-const ships = [{name:"destroyer", time:10.5, metal:358, gas:215, crystal:143}                        
-              ]
+const ships = [{name:"destroyer", time:10.5, metal:358, gas:215, crystal:143}]
 client.once("ready", () => { 
 	console.log("Ready!");
 });
 client.on("message", message => {
 let args = message.content.split(' ');
-if(args[0] == 'p!'){
+if(args[0] == prefix){
     try {
     if(args.length > 1){
     switch(args[1].toLowerCase()){
-        case 'dist': 
+        case 'dist':
+            if(args[2] != undefined || args[3] != undefined || args[4] != undefined || args[5] != undefined){ 
             let A = {
                 Q: args[2],
                 R: args[3]
@@ -29,8 +29,18 @@ if(args[0] == 'p!'){
                 R: args[5]
             };
             message.channel.send(hexMath.distance(A, B));
+        } else {
+            message.channel.send("Wrrong command usage! \nThe correct one is: p! dist x1 y1 x2 y2");
+        }
             break;
-        case 'hex': let hex = readHexId(args[2], args[3]);message.channel.send("Hex: " + hex) ;break;
+        case 'hex':
+            if(args[2] != undefined || args[3] != undefined){ 
+            let hex = readHexId(args[2], args[3]);
+            message.channel.send("Hex: " + hex) ;
+            } else {
+                message.channel.send("Wrrong command usage! \nThe correct one is: p! hex x y");
+            }
+            break;
         case 'ships': if(args[2] != undefined && args[3] != undefined){
             message.channel.send(calculateShips(args[2], args[3]));
         } else if(args[2]!= undefined){
@@ -49,10 +59,10 @@ if(args[0] == 'p!'){
     }
 })
 client.login(token); 
-loadMap("map.json");
+loadMap("./resources/map.json");
 function loadMap(path){
     let data = "";
-    map = JSON.parse(fs.readFileSync("map.json"));
+    map = JSON.parse(fs.readFileSync(path));
     for(q = 0; q <= map.MapRadius*2; q++){
         hexArray.push([]);
         for(r = 0; r <= map.MapRadius*2;r++){
