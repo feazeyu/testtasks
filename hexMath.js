@@ -1,5 +1,3 @@
-
-
 const eps = 0.000001; //due to double type errors
 
 class Hex {
