@@ -19,6 +19,18 @@ initCellDefinitionDict();
 client.once("ready", () => { 
 	console.log("Ready!");
 });
+const exampleEmbed = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle('Some title')
+	.setURL('https://discord.js.org/')
+	.setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+	.setDescription('Some description here')
+	.setThumbnail('https://i.imgur.com/wSTFkRM.png')
+	.setImage('https://i.imgur.com/wSTFkRM.png')
+	.setTimestamp()
+	.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+
+
 class Hex {
   constructor(Q, R, id){
       this.coords = new hexMath.Coords(Q,R);
@@ -77,6 +89,9 @@ client.on("message", (message) => {
               );
             }
             break;
+          case "yo":
+            message.channel.send(exampleEmbed);
+              break;
           case "ships":
             if (args[2] != undefined && args[3] != undefined) {
               message.channel.send(calculateShips(args[2], args[3]));
@@ -129,7 +144,7 @@ function readHex(q, r) {
 if(Math.abs(q)> map.MapRadius || Math.abs(r)>map.MapRadius){
     return new Hex(q, r, 0);
 }
-console.log("Q: " + q + " R: " + r);
+//console.log("Q: " + q + " R: " + r);
   return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
 }
 function calculateShips(shipType, moonPts = 0) {
@@ -174,9 +189,8 @@ function rssWithinRadius(middle, radius, types){
   let coordsArray = hexMath.coordsWithinRadius(middle, radius);
   for(i in coordsArray){
     let hex = readHexCoords(coordsArray[i]);
-    console.log(hex);
+    //console.log(hex);
     if(types.includes(hex.type)){
-        console.log("Did it :>")
       for(key in hex.HarvestValue){
         HarvestValue[key] += parseInt(hex.HarvestValue[key]);
       }
