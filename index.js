@@ -19,6 +19,17 @@ initCellDefinitionDict();
 client.once("ready", () => { 
 	console.log("Ready!");
 });
+class Hex {
+  constructor(Q, R, id){
+      this.coords = new hexMath.Coords(Q,R);
+      this.id = id;
+      this.type = id.toString().charAt(0); //1 Planet 2 Field 3 Moon
+      if(this.type == '3'){
+          this.size = CellDefinitionsDict[this.id].Size;
+      }
+      this.HarvestValue= CellDefinitionsDict[this.id].HarvestValue;
+  }
+}
 client.on("message", (message) => {
   let args = message.content.split(" ");
   if (args[0] == prefix) {
@@ -49,8 +60,8 @@ client.on("message", (message) => {
             break;
           case "hex":
             if (args[2] != undefined && args[3] != undefined) {
-              let hex = readHexId(args[2], args[3]);
-              message.channel.send("Hex: " + hex);
+              let hex = readHex(args[2], args[3]);
+              message.channel.send("Hex: " + hex.id);
             } else {
               message.channel.send(
                 "```Wrrong command usage! \nThe correct one is: p! hex x y```"
@@ -87,24 +98,27 @@ loadMap("./resources/map.json");
 function loadMap(path) {
   let data = "";
   map = JSON.parse(fs.readFileSync(path));
-  for (q = 0; q <= map.MapRadius * 2; q++) {
+  for (q = -map.MapRadius; q <= map.MapRadius; q++) {
     hexArray.push([]);
-    for (r = 0; r <= map.MapRadius * 2; r++) {
-      hexArray[q].push("0"); //Create a 2d array for further population.
+    for (r = -map.MapRadius; r <= map.MapRadius; r++) {
+      hexArray[q+map.MapRadius].push(new Hex(q, r, 0)); //Create a 2d array for further population.
     }
   }
   for (x = 0; x < map.Templates.length; x++) {
     for (i = 0; i < map.Templates[x].Hexes.length; i++) {
       hexArray[map.Templates[x].Hexes[i].Position.Q + map.MapRadius][
         map.Templates[x].Hexes[i].Position.R + map.MapRadius
-      ] = map.Templates[x].Hexes[i].ContentID;
+      ] = new Hex(map.Templates[x].Hexes[i].Position.Q, map.Templates[x].Hexes[i].Position.R, map.Templates[x].Hexes[i].ContentID);
       //data += "{ Position: { Q: " + map.Templates[x].Hexes[i].Position.Q + ", R: " + map.Templates[x].Hexes[i].Position.R + " }, ContentID: " +  map.Templates[x].Hexes[i].ContentID + "},\n"
     }
   }
 }
-function readHexId(q, r) {
+function readHexCoords(coords){
+  return readHex(coords.Q, coords.R);
+}
+function readHex(q, r) {
 if(Math.abs(q)> map.MapRadius || Math.abs(r)>map.MapRadius){
-    return 0;
+    return new Hex(q, r, 0);
 }
   return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
 }
@@ -138,17 +152,25 @@ function calculateShips(shipType, moonPts = 0) {
     " crystals/h ```"
   );
 }
-class Hex {
-    constructor(Q, R, id){
-        this.coords = new hexMath.Coords(Q,R);
-        this.id = id;
-        this.type = id.toString().charAt(0); //1 Planet 2 Field 3 Moon
-        if(this.type == '3'){
-            this.size = CellDefinitionsDict[this.id].Size;
-        }
-        this.HarvestValue= CellDefinitionsDict[this.id].HarvestValue;
+
+function rssWithinRadius(middle, radius, types){
+  let HarvestValue = {
+    "LQ": 0,
+    "MR": 0,
+    "GR": 0,
+    "CR": 0
+  }
+  for(coords in hexMath.coordsWithinRadius(middle, radius)){
+    let hex = readHexCoords(coords);
+    if(types.include(hex.type)){
+      for(key in hex.HarvestValue){
+        HarvestValue[key] += hex.HarvestValue[key];
+      }
     }
+  }
+  return HarvestValue;
 }
+
 var testHex = new Hex(10, 10, 303);
 console.log(testHex.HarvestValue.LQ);
 console.log(testHex.type);
