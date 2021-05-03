@@ -10,6 +10,13 @@ const prefix = "p!";
 const unknownCommandErr = "Unrecognized command! Squawk!"; //Error for unknown command
 const ships = [{name:"destroyer", time:10.5, metal:358, gas:215, crystal:143}]
 const CellDefinitions = JSON.parse(fs.readFileSync("./resources/CELL_DEFINITIONS.json"));
+var CellDefinitionsDict = {};
+function initCellDefinitionDict(){
+    for(x = 0; x<CellDefinitions.length;x++){
+        CellDefinitionsDict[CellDefinitions[x].Id]=CellDefinitions[x];   
+    }
+}
+initCellDefinitionDict();
 client.once("ready", () => { 
 	console.log("Ready!");
 });
@@ -129,20 +136,18 @@ function calculateShips(shipType, moonPts = 0) {
     "** crystals/h \n**"
   );
 }
-
 class Hex {
     constructor(Q, R, id){
-        this.q = Q;
-        this.r = R;
+        this.coords = new hexMath.Coords(Q,R);
         this.id = id;
         this.type = id.toString().charAt(0); //1 Planet 2 Field 3 Moon
-        for(x = 0; x<CellDefinitions.length;x++){
-            if(this.id == CellDefinitions[x].Id){
-                this.HarvestValue = CellDefinitions[x].HarvestValue;
-            }
+        if(this.type == '3'){
+            this.size = CellDefinitionsDict[this.id].Size;
         }
+        this.HarvestValue= CellDefinitionsDict[this.id].HarvestValue;
     }
 }
-var testHex = new Hex(10, 10, 103);
+var testHex = new Hex(10, 10, 303);
 console.log(testHex.HarvestValue.LQ);
 console.log(testHex.type);
+console.log(testHex.size);
