@@ -50,12 +50,82 @@ class Hex {
 }
 client.on("message", (message) => {
   let args = message.content.split(" ");
+  let harvest;
   if (args[0] == prefix) {
     //try {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss":
-          let harvest = rssAt(
+          harvest = rssAt(
+            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
+            parseInt(args[4])
+          );
+          message.channel.send(
+            "``` Labor: " +
+              harvest.LQ +
+              " \n" +
+              " Metal: " +
+              harvest.MR +
+              " \n" +
+              " Gas: " +
+              harvest.GR +
+              " \n" +
+              " Crystal: " +
+              harvest.CR +
+              " \n" +
+              " Total: " +
+              harvest.total +
+              "```"
+          );
+          break;
+        case "labor":
+          harvest = laborAt(
+            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
+            parseInt(args[4])
+          );
+          message.channel.send(
+            "``` Labor: " +
+              harvest.LQ +
+              " \n" +
+              " Metal: " +
+              harvest.MR +
+              " \n" +
+              " Gas: " +
+              harvest.GR +
+              " \n" +
+              " Crystal: " +
+              harvest.CR +
+              " \n" +
+              " Total: " +
+              harvest.total +
+              "```"
+          );
+          break;
+        case "planets":
+          harvest = planetsAt(
+            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
+            parseInt(args[4])
+          );
+          message.channel.send(
+            "``` Labor: " +
+              harvest.LQ +
+              " \n" +
+              " Metal: " +
+              harvest.MR +
+              " \n" +
+              " Gas: " +
+              harvest.GR +
+              " \n" +
+              " Crystal: " +
+              harvest.CR +
+              " \n" +
+              " Total: " +
+              harvest.total +
+              "```"
+          );
+          break;
+        case "fields":
+          harvest = fieldsAt(
             new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
             parseInt(args[4])
           );
@@ -201,6 +271,7 @@ function calculateShips(shipType, moonPts = 0) {
 
 function rssAt(coords, radius) {
   let data = accessRdata(coords, radius);
+  //console.log(data);
   let HarvestValue = {
     LQ: data["1"].LQ + data["2"].LQ,
     MR: data["1"].MR + data["2"].MR,
@@ -248,7 +319,10 @@ function planetsAt(coords, radius) {
 }
 
 function accessRdata(coords, radius) {
+  //console.log("acessing data within r: " + radius + " at:");
+  //console.log(coords);
   if (!rData[radius]) {
+    //console.log("precalcing data");
     precalcRdata(radius);
   }
   if (
@@ -270,11 +344,14 @@ function accessRdata(coords, radius) {
       },
     };
   }
-  return rData[radius][q - map.MapRadius][r - map.MapRadius];
+
+  return rData[radius][coords.Q + map.MapRadius][coords.R + map.MapRadius];
 }
 
 function precalcRdata(radius) {
+  console.log("precalcing data for r: " + radius);
   if (rData[radius]) {
+    console.log("data already precalced");
     return;
   }
   rData[radius] = [];
