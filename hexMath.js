@@ -12,7 +12,7 @@ function distance(A, B) {
   if ((A.Q - B.Q) * (A.R - B.R) <= 0 + eps) {
     return Math.max(Math.abs(A.Q - B.Q), Math.abs(A.R - B.R));
   } else {
-    return Math.abs(A.Q - B.Q) + abs(A.R - B.R);
+    return Math.abs(A.Q - B.Q) + Math.abs(A.R - B.R);
   }
 }
 
