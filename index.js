@@ -3,7 +3,6 @@ const fs = require("fs");
 const hexMath = require("./hexMath");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
-console.log(unitPlanner.ships);
 const emoji = { 
   crystal: "<:Crystal:757976643363930122>",
   metal:"<:Metal:757976643493953688>",
@@ -53,28 +52,26 @@ client.on("message", (message) => {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss":
+          harvest = bestTotalSpots(rssAt, new hexMath.Coords(args[2], args[3]), args[4], args[5])
           if(parseInt(args[4]) > 10){
             message.channel.send(
               tooBigRadiusError(parseInt(args[4]))
             );
             break;
           }
-          harvest = rssAt(
-            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
-            parseInt(args[4])
-          );
-          let rss = new Discord.MessageEmbed()
+         var temp = [];
+         for(x = 0;x < 10; x++){
+           temp.push({name:x+1+". " + harvest[x].coords.gotoCoords(), value: harvest[x].LQ + "<:Salute1:786442517209415710> " + harvest[x].MR + "<:Metal:757976643493953688> " +harvest[x].GR + "<:Gas:757976643204546618> " + harvest[x].CR + "<:Crystal:757976643363930122>" + " | Total: " + harvest[x].total + " | Distance: " + harvest[x].dist})
+          
+        }
+         let msg = new Discord.MessageEmbed()
 	          .setColor('#0099ff')
           	.setTitle('Best resource spots:')
           	.setDescription('Fields, Moons and planets for radius: ' + args[4])
             .addFields(
-            {name:'Labor', value: harvest.LQ},
-            {name:'Metal', value: harvest.MR + "<:Metal:757976643493953688>",inline:true},
-            {name:'Gas', value: harvest.GR + "<:Gas:757976643204546618>", inline:true},
-            {name:'Crystal', value: harvest.CR + "<:Crystal:757976643363930122>" , inline:true},
-            {name:'Total', value: harvest.MR + harvest.GR+harvest.CR}
+              temp
          )
-          message.channel.send(rss);
+          message.channel.send(msg);
           break;
         case "labor":
           harvest = laborAt(
@@ -283,7 +280,8 @@ function comparatorTotal(a, b){
   return b.total - a.total;
 }
 
-function bestTotalSpots(entries, fnc, middle, radius, distance){
+function bestTotalSpots(fnc, middle, radius, distance){
+  let entries =10;
   let spots = [];
   let coordsArray = hexMath.coordsWithinRadius(middle, distance);
   for (i in coordsArray) {
@@ -292,6 +290,7 @@ function bestTotalSpots(entries, fnc, middle, radius, distance){
     if (hex.id == 0) {
       let data = fnc(hex.coords, radius)
       data["coords"] = hex.coords;
+      data.dist = hexMath.distance(hex.coords,middle);
       spots.push(data); 
     }
   }
