@@ -23,16 +23,19 @@ client.once("ready", () => {
   console.log("Ready!");
 });
 const exampleEmbed = new Discord.MessageEmbed()
-	.setColor('#0099ff')
-	.setTitle('Some title')
-	.setURL('https://discord.js.org/')
-	.setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
-	.setDescription('Some description here')
-	.setThumbnail('https://i.imgur.com/wSTFkRM.png')
-	.setImage('https://i.imgur.com/wSTFkRM.png')
-	.setTimestamp()
-	.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
-
+  .setColor("#0099ff")
+  .setTitle("Some title")
+  .setURL("https://discord.js.org/")
+  .setAuthor(
+    "Some name",
+    "https://i.imgur.com/wSTFkRM.png",
+    "https://discord.js.org"
+  )
+  .setDescription("Some description here")
+  .setThumbnail("https://i.imgur.com/wSTFkRM.png")
+  .setImage("https://i.imgur.com/wSTFkRM.png")
+  .setTimestamp()
+  .setFooter("Some footer text here", "https://i.imgur.com/wSTFkRM.png");
 
 class Hex {
   constructor(Q, R, id) {
@@ -118,69 +121,21 @@ client.on("message", (message) => {
         default:
           message.channel.send(unknownCommandErr);
           break;
-          case "dist":
-            if (
-              args[2] != undefined &&
-              args[3] != undefined &&
-              args[4] != undefined &&
-              args[5] != undefined
-            ) {
-              let A = {
-                Q: args[2],
-                R: args[3],
-              };
-              let B = {
-                Q: args[4],
-                R: args[5],
-              };
-              message.channel.send(hexMath.distance(A, B));
-            } else {
-              message.channel.send(
-                "```Wrrong command usage! \nThe correct one is: p! dist x1 y1 x2 y2```"
-              );
-            }
-            break;
-          case "hex":
-            if (args[2] != undefined && args[3] != undefined) {
-              let hex = readHex(args[2], args[3]);
-              message.channel.send("Hex: " + hex.id);
-            } else {
-              message.channel.send(
-                "```Wrrong command usage! \nThe correct one is: p! hex x y```"
-              );
-            }
-            break;
-          case "yo":
-            message.channel.send(exampleEmbed);
-              break;
-          case "ships":
-            if (args[2] != undefined && args[3] != undefined) {
-              message.channel.send(calculateShips(args[2], args[3]));
-            } else if (args[2] != undefined) {
-             message.client.send(calculateShips(args[2]));
-            } else {
-              message.channel.send("```Gimme arrguments, landlubber!```");
-            }
-            break;
-          default:
-            message.channel.send(unknownCommandErr);
-            break;
-        }
-      } else {
-        message.channel.send(unknownCommandErr);
       }
     } else {
       message.channel.send(unknownCommandErr);
     }
-    /*} catch (e) {
+  } else {
+    message.channel.send(unknownCommandErr);
+  }
+  /*} catch (e) {
       message.channel.send(
         "```No joke, don't do that again. Please send this error to feazeyu#9566" +
           "\n" +
           e + "```"
       );
     }*/
-  }
-);
+});
 client.login(token);
 loadMap("./resources/map.json");
 function loadMap(path) {
@@ -211,8 +166,8 @@ function readHexCoords(coords) {
 function readHex(q, r) {
   if (Math.abs(q) > map.MapRadius || Math.abs(r) > map.MapRadius) {
     return new Hex(q, r, 0);
-}
-//console.log("Q: " + q + " R: " + r);
+  }
+  //console.log("Q: " + q + " R: " + r);
   return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
 }
 function calculateShips(shipType, moonPts = 0) {
@@ -246,56 +201,56 @@ function calculateShips(shipType, moonPts = 0) {
   );
 }
 
-function rssAt(coords, radius){
+function rssAt(coords, radius) {
   let data = accessRdata(coords, radius);
   let HarvestValue = {
-    "LQ": data["1"].LQ + data["2"].LQ,
-    "MR": data["1"].MR + data["2"].MR,
-    "GR": data["1"].GR + data["2"].GR,
-    "CR": data["1"].CR + data["2"].CR
-  }
+    LQ: data["1"].LQ + data["2"].LQ,
+    MR: data["1"].MR + data["2"].MR,
+    GR: data["1"].GR + data["2"].GR,
+    CR: data["1"].CR + data["2"].CR,
+  };
   HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
   return HarvestValue;
 }
 
-function laborAt(coords, radius){
+function laborAt(coords, radius) {
   let data = accessRdata(coords, radius);
   let HarvestValue = {
-    "LQ": data["1"].LQ + data["2"].LQ,
-    "MR": data["1"].MR + data["2"].MR,
-    "GR": data["1"].GR + data["2"].GR,
-    "CR": data["1"].CR + data["2"].CR
-  }
+    LQ: data["1"].LQ + data["2"].LQ,
+    MR: data["1"].MR + data["2"].MR,
+    GR: data["1"].GR + data["2"].GR,
+    CR: data["1"].CR + data["2"].CR,
+  };
   HarvestValue["total"] = HarvestValue.LQ;
   return HarvestValue;
 }
 
-function fieldsAt(coords, radius){
+function fieldsAt(coords, radius) {
   let data = accessRdata(coords, radius);
   let HarvestValue = {
-    "LQ": data["2"].LQ,
-    "MR": data["2"].MR,
-    "GR": data["2"].GR,
-    "CR": data["2"].CR
-  }
+    LQ: data["2"].LQ,
+    MR: data["2"].MR,
+    GR: data["2"].GR,
+    CR: data["2"].CR,
+  };
   HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
   return HarvestValue;
 }
 
-function planetsAt(coords, radius){
+function planetsAt(coords, radius) {
   let data = accessRdata(coords, radius);
   let HarvestValue = {
-    "LQ": data["1"].LQ,
-    "MR": data["1"].MR,
-    "GR": data["1"].GR,
-    "CR": data["1"].CR
-  }
+    LQ: data["1"].LQ,
+    MR: data["1"].MR,
+    GR: data["1"].GR,
+    CR: data["1"].CR,
+  };
   HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
   return HarvestValue;
 }
 
 function accessRdata(coords, radius) {
-  if(!rData[radius]){
+  if (!rData[radius]) {
     precalcRdata(radius);
   }
   if (
@@ -303,17 +258,17 @@ function accessRdata(coords, radius) {
     Math.abs(coords.R) > map.MapRadius
   ) {
     return {
-      "1": {
-        "LQ": 0,
-        "MR": 0,
-        "GR": 0,
-        "CR": 0,
+      1: {
+        LQ: 0,
+        MR: 0,
+        GR: 0,
+        CR: 0,
       },
-      "2": {
-        "LQ": 0,
-        "MR": 0,
-        "GR": 0,
-        "CR": 0,
+      2: {
+        LQ: 0,
+        MR: 0,
+        GR: 0,
+        CR: 0,
       },
     };
   }
@@ -348,8 +303,8 @@ function rssWithinRadius(middle, radius, types) {
   for (i in coordsArray) {
     let hex = readHexCoords(coordsArray[i]);
     //console.log(hex);
-    if(types.includes(hex.type)){
-      for(key in hex.HarvestValue){
+    if (types.includes(hex.type)) {
+      for (key in hex.HarvestValue) {
         HarvestValue[key] += parseInt(hex.HarvestValue[key]);
       }
     }
