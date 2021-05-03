@@ -1,5 +1,6 @@
 const Discord = require("discord.js"); 
 const fs = require("fs"); 
+const hexMath = require("./hexMath");
 const { parse } = require("url");
 var map;
 var hexArray = [];
@@ -18,9 +19,18 @@ if(args[0] == 'p!'){
     try {
     if(args.length > 1){
     switch(args[1].toLowerCase()){
-        case 'hex': let hex = readHexId(args[2], args[3]);message.channel.send("Hex: " + hex) ;break;
-        case 'yo': message.channel.send("Yo");
+        case 'dist': 
+            let A = {
+                Q: args[2],
+                R: args[3]
+            }; 
+            let B = {
+                Q: args[4],
+                R: args[5]
+            };
+            message.channel.send(hexMath.distance(A, B));
             break;
+        case 'hex': let hex = readHexId(args[2], args[3]);message.channel.send("Hex: " + hex) ;break;
         case 'ships': if(args[2] != undefined && args[3] != undefined){
             message.channel.send(calculateShips(args[2], args[3]));
         } else if(args[2]!= undefined){
@@ -49,7 +59,6 @@ function loadMap(path){
             hexArray[q].push("0");                           //Create a 2d array for further population.
         }
     }
-    console.log("hexArrayContent: " + hexArray[24][78]/*+" hexArray[r].length: "+ hexArray[r].length*/  )
     for(x = 0; x < map.Templates.length;x++){
         for(i = 0; i < map.Templates[x].Hexes.length;i++){
             hexArray[map.Templates[x].Hexes[i].Position.Q +map.MapRadius][map.Templates[x].Hexes[i].Position.R+map.MapRadius] = map.Templates[x].Hexes[i].ContentID;

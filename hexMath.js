@@ -10,3 +10,4 @@ function distance(A, B){ //hexes -> their distance
     }
 }
 
+exports.distance = distance;
