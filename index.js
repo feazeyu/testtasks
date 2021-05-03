@@ -9,6 +9,7 @@ const token = fs.readFileSync("token.txt").toString();
 const prefix = 'p!';
 const unknownCommandErr = "Unrecognized command! Squawk!"; //Error for unknown command
 const ships = [{name:"destroyer", time:10.5, metal:358, gas:215, crystal:143}]
+const CellDefinitions = JSON.parse(fs.readFileSync("./resources/CELL_DEFINITIONS.json"));
 client.once("ready", () => { 
 	console.log("Ready!");
 });
@@ -54,7 +55,7 @@ if(args[0] == prefix){
         message.channel.send(unknownCommandErr);
     }
     } catch(e){
-        message.channel.send("No joke, don't do that again. Please send this error to feazeyu#9566" + "\n" + e);
+        message.channel.send("No joke, don't do that again.\n" + e);
     }
     }
 })
@@ -96,11 +97,19 @@ function calculateShips(shipType, moonPts = 0){
     return "You'll make: "+ shipsPerHour + " " + shipType + " per hour. \nFor sustained production you'll need: \n**" + Math.floor(rssPerHour.metal) + "** metal/h" + Math.floor(rssPerHour.gas) + "** gas/h \n**" + Math.floor(rssPerHour.crystal) + "** crystals/h \n**";
 }
 
-class Field {
+class Hex {
     constructor(Q, R, id){
         this.q = Q;
         this.r = R;
         this.id = id;
+        this.type = id.toString().charAt(0); //1 Planet 2 Field 3 Moon
+        for(x = 0; x<CellDefinitions.length;x++){
+            if(this.id == CellDefinitions[x].Id){
+                this.HarvestValue = CellDefinitions[x].HarvestValue;
+            }
+        }
     }
-
 }
+var testHex = new Hex(10, 10, 103);
+console.log(testHex.HarvestValue.LQ);
+console.log(testHex.type);
