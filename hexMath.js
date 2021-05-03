@@ -1,6 +1,6 @@
 const eps = 0.000001; //due to double type errors
 
-class Hex {
+class Coords {
     constructor(Q, R){
 
         this.Q = Q;
@@ -16,44 +16,44 @@ function distance(A, B){ //hexes -> their distance
     }
 }
 
-function hexesWithDistFrom(middle, dist){
+function coordsWithDistFrom(middle, dist){
     if(dist <= 0 || Math.floor(dist) != dist){
         throw "dist : " + dist + " has to be positive integer!";
     }
     let dQ = 0;
     let dR = dist;
-    let hexes = [];
+    let coords = [];
     while(dQ < dist){
-        hexes.push(Hex(middle.Q + dQ, middle.R + dR));
-        hexes.push(Hex(middle.Q - dQ, middle.R - dR));
+        coords.push(Coords(middle.Q + dQ, middle.R + dR));
+        coords.push(Coords(middle.Q - dQ, middle.R - dR));
         dQ++;
     }
     while(dR > 0){
-        hexes.push(Hex(middle.Q + dQ, middle.R + dR));
-        hexes.push(Hex(middle.Q - dQ, middle.R - dR));
+        coords.push(Coords(middle.Q + dQ, middle.R + dR));
+        coords.push(Coords(middle.Q - dQ, middle.R - dR));
         dR--;
     }
     while(dQ > 0){
-        hexes.push(Hex(middle.Q + dQ, middle.R + dR));
-        hexes.push(Hex(middle.Q - dQ, middle.R - dR));
+        coords.push(Coords(middle.Q + dQ, middle.R + dR));
+        coords.push(Coords(middle.Q - dQ, middle.R - dR));
         dQ--;
         dR--;
     }
-    return hexes;
+    return coords;
 }
 
-function hexesWithinRadius(middle, radius){
+function coordsWithinRadius(middle, radius){
     if(radius <= 0 || Math.floor(radius) != radius){
         throw "radius : " + radius + " has to be positive integer!";
     }
-    hexes = [];
+    coords = [];
     for(let dist = radius; dist >= 1; dist--){
-        hexes.concat(hexesWithDistFrom(middle, dist));
+        coords.concat(coordsWithDistFrom(middle, dist));
     }
-    return hexes;
+    return coords;
 }
 
 exports.distance = distance;
-exports.Hex = Hex;
-exports.hexesWithinRadius = hexesWithinRadius;
+exports.Coords = Coords;
+exports.coordsWithinRadius = coordsWithinRadius;
 
