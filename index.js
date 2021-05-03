@@ -19,7 +19,7 @@ if(args[0] == prefix){
     if(args.length > 1){
     switch(args[1].toLowerCase()){
         case 'dist':
-            if(args[2] != undefined || args[3] != undefined || args[4] != undefined || args[5] != undefined){ 
+            if(args[2] != undefined && args[3] != undefined && args[4] != undefined && args[5] != undefined){ 
             let A = {
                 Q: args[2],
                 R: args[3]
@@ -34,7 +34,7 @@ if(args[0] == prefix){
         }
             break;
         case 'hex':
-            if(args[2] != undefined || args[3] != undefined){ 
+            if(args[2] != undefined && args[3] != undefined){ 
             let hex = readHexId(args[2], args[3]);
             message.channel.send("Hex: " + hex) ;
             } else {
