@@ -5,6 +5,7 @@ const ships = [
         metal: 65,
 		gas: 39,
 		crystal: 26,
+        maxReduction: 0.6
     }   
     ,
     {
@@ -12,7 +13,8 @@ const ships = [
         time: 5,
         metal: 49.5,
 		gas: 33,
-		crystal: 82.5
+		crystal: 82.5,
+        maxReduction: 0.7
     }
     ,
     {

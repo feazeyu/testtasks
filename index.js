@@ -4,6 +4,11 @@ const hexMath = require("./hexMath");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
 console.log(unitPlanner.ships);
+const emoji = { 
+  crystal: "<:Crystal:757976643363930122>",
+  metal:"<:Metal:757976643493953688>",
+  gas:"<:Gas:757976643204546618>"
+}
 var map;
 var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
@@ -36,6 +41,7 @@ class Hex {
     this.HarvestValue = CellDefinitionsDict[this.id].HarvestValue;
   }
 }
+
 client.on("message", (message) => {
   let args = message.content.split(" ");
   let harvest;
@@ -48,23 +54,18 @@ client.on("message", (message) => {
             new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
             parseInt(args[4])
           );
-          message.channel.send(
-            "``` Labor: " +
-              harvest.LQ +
-              " \n" +
-              " Metal: " +
-              harvest.MR +
-              " \n" +
-              " Gas: " +
-              harvest.GR +
-              " \n" +
-              " Crystal: " +
-              harvest.CR +
-              " \n" +
-              " Total: " +
-              harvest.total +
-              "```"
-          );
+          let rss = new Discord.MessageEmbed()
+	          .setColor('#0099ff')
+          	.setTitle('Best resource spots:')
+          	.setDescription('Fields, Moons and planets for radius: ' + args[4])
+            .addFields(
+            {name:'Labor', value: harvest.LQ},
+            {name:'Metal', value: harvest.MR + "<:Metal:757976643493953688>",inline:true},
+            {name:'Gas', value: harvest.GR + "<:Gas:757976643204546618>", inline:true},
+            {name:'Crystal', value: harvest.CR + "<:Crystal:757976643363930122>" , inline:true},
+            {name:'Total', value: harvest.MR + harvest.GR+harvest.CR}
+         )
+          message.channel.send(rss);
           break;
         case "labor":
           harvest = laborAt(
@@ -172,7 +173,7 @@ client.on("message", (message) => {
           if (args[2] != undefined && args[3] != undefined) {
             message.channel.send(calculateShips(args[2], args[3]));
           } else if (args[2] != undefined) {
-            message.client.send(calculateShips(args[2]));
+            message.channel.send(calculateShips(args[2]));
           } else {
             message.channel.send("```Gimme arrguments, landlubber!```");
           }
