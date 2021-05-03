@@ -55,9 +55,9 @@ function coordsWithinRadius(middle, radius) {
 
 function runTests(){
     //distance tests
-    let A = Coords(-83, 130); //Next Gen distro
-    let B = Coords(-66, 192); //Corner stalker
-    let C = Coords(-65, 123); //No2 (Baika)
+    let A = new Coords(-83, 130); //Next Gen distro
+    let B = new Coords(-66, 192); //Corner stalker
+    let C = new Coords(-65, 123); //No2 (Baika)
 
     let distAB = 79; //values from SB client
     let distAC = 18;

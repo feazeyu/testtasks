@@ -62,7 +62,7 @@ client.on("message", (message) => {
             if (args[2] != undefined && args[3] != undefined) {
               message.channel.send(calculateShips(args[2], args[3]));
             } else if (args[2] != undefined) {
-              message.channel.send(calculateShips(args[2]));
+             message.client.send(calculateShips(args[2]));
             } else {
               message.channel.send("Gimme arrguments, landlubber!");
             }
@@ -126,17 +126,17 @@ function calculateShips(shipType, moonPts = 0) {
     metal: shipsPerHour * ships[shipId].metal,
   };
   return (
-    "You'll make: " +
+    "```You'll make: " +
     shipsPerHour +
     " " +
     shipType +
-    " per hour. \nFor sustained production you'll need: \n**" +
+    " per hour. \nFor sustained production you'll need: \n" +
     Math.floor(rssPerHour.metal) +
-    "** metal/h" +
+    " metal/h\n" +
     Math.floor(rssPerHour.gas) +
-    "** gas/h \n**" +
+    " gas/h \n" +
     Math.floor(rssPerHour.crystal) +
-    "** crystals/h \n**"
+    " crystals/h ```"
   );
 }
 class Hex {
@@ -154,3 +154,4 @@ var testHex = new Hex(10, 10, 303);
 console.log(testHex.HarvestValue.LQ);
 console.log(testHex.type);
 console.log(testHex.size);
+//hexMath.runTests();
