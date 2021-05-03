@@ -10,6 +10,9 @@ const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
 const prefix = "p!";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
+function tooBigRadiusError(radius){
+  return "```Radius " + radius + "?! I can do up to 10. Not like I couldn't calculate it, I'm a smarrt pirrate parrot afterr all! But I'm lazy!```";
+}
 const CellDefinitions = JSON.parse(
   fs.readFileSync("./resources/CELL_DEFINITIONS.json")
 );
@@ -44,6 +47,12 @@ client.on("message", (message) => {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss":
+          if(parseInt(args[4]) > 10){
+            message.channel.send(
+              tooBigRadiusError(parseInt(args[4]))
+            );
+            break;
+          }
           harvest = rssAt(
             new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
             parseInt(args[4])
@@ -267,6 +276,26 @@ function calculateShips(shipType, moonPts = 0) {
     " crystals/h ```"*/
   );
   
+}
+
+function comparatorTotal(a, b){
+  return b.total - a.total;
+}
+
+function bestTotalSpots(entries, fnc, middle, radius, distance){
+  let spots = [];
+  let coordsArray = hexMath.coordsWithinRadius(middle, distance);
+  for (i in coordsArray) {
+    let hex = readHexCoords(coordsArray[i]);
+    //console.log(hex);
+    if (hex.id == 0) {
+      let data = fnc(hex.coords, radius)
+      data["coords"] = hex.coords;
+      spots.push(data); 
+    }
+  }
+  spots.sort(comparatorTotal);
+  return spots.slice(0, entries);
 }
 
 function rssAt(coords, radius) {
