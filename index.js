@@ -104,6 +104,9 @@ function loadMap(path) {
   }
 }
 function readHexId(q, r) {
+if(Math.abs(q)> map.MapRadius || Math.abs(r)>map.MapRadius){
+    return 0;
+}
   return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
 }
 function calculateShips(shipType, moonPts = 0) {
