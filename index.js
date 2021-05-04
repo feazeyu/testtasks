@@ -38,6 +38,7 @@ const token = fs.readFileSync("token.txt").toString();
 client.login(token);
 const prefix = "p!";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
+const needToSpecifyRadiusError = "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
 const wrongSyntaxErr =
   "```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?\n(syntax error)```"; //Wrong syntax error
 function tooBigRadiusError(radius) {
@@ -168,30 +169,56 @@ function createBestSpotsMsg(data) {
     .addFields(spots);
 }
 
-function checkArguments(args){
-  if (args[6] == undefined) {
+function checkArguments(args) {
+  if (!("e" in args) || args.e.length == 0) {
     // default size
-    args[6] = 50;
+    args.e = [50];
   }
-  if (parseInt(args[4]) > 10) {
+  if (!("r" in args) || args.r.length == 0){
+    return needToSpecifyRadiusError;
+  }
+  if (args.r[0] > 10) {
     return tooBigRadiusError(parseInt(args[4]));
   }
+  if (!("d" in args) || args.d.length < 2){
+    args.d = [0, 0, map.MapRadius];
+  }
+  if (args.d.length == 2){
+    args.d.push[map.MapRadius];
+  }
+}
+// p! rss r 4 d -12 25 -> {"r": [r], "d": [-12, 25]}
+function parseArgs(args) {
+  let i = 2;
+  let dict = { base: [] };
+  let current = "base";
+  while (i < args.length) {
+    let num = parseInt(args[i]);
+    if (isNaN(num)) {
+      current = args[i];
+      dict[current] = [];
+    } else {
+      dict[current].push(num);
+    }
+    i++;
+  }
+  return dict;
 }
 
-function bestSpotCommand(message, args, f){
+function bestSpotCommand(message, args, f) {
   harvest = bestTotalSpots(
     f,
-    new hexMath.Coords(args[2], args[3]),
-    args[4],
-    args[5],
-    args[6]
+    new hexMath.Coords(args.d[0], args.d[1]),
+    args.r[0],
+    args.d[2],
+    args.e[0]
   );
   //TODO Osetrit crashe pri nezadani argumentu
 
   new_entry = new Entry(
     {
       harvest: harvest,
-      radius: args[4],
+      radius: args.r[0],
       pages: {
         page: 0,
         limit: Math.ceil(harvest.length / pageSize),
@@ -206,40 +233,43 @@ function bestSpotCommand(message, args, f){
 
 client.on("message", (message) => {
   let args = message.content.split(" ");
-  let harvest;
-  let new_entry;
   let err;
+  let parsedArgs;
   if (args[0] == prefix) {
     //try {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss": //RSS command
-          err = checkArguments(args);
-          if(err){
+          parsedArgs = parseArgs(args);
+          err = checkArguments(parsedArgs);
+          if (err) {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, args, rssAt);
+          bestSpotCommand(message, parsedArgs, rssAt);
           break;
         case "labor":
-          err = checkArguments(args);
-          if(err){
+          parsedArgs = parseArgs(args);
+          err = checkArguments(parsedArgs);
+          if (err) {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, args, laborAt);
+          bestSpotCommand(message, parsedArgs, laborAt);
           break;
         case "planets":
-          err = checkArguments(args);
-          if(err){
+          parsedArgs = parseArgs(args);
+          err = checkArguments(parsedArgs);
+          if (err) {
             message.channel.send(err);
             break;
           }
           bestSpotCommand(message, args, planetsAt);
           break;
         case "fields":
-          err = checkArguments(args);
-          if(err){
+          parsedArgs = parseArgs(args);
+          err = checkArguments(parsedArgs);
+          if (err) {
             message.channel.send(err);
             break;
           }
@@ -401,7 +431,7 @@ function comparatorTotal(a, b) {
   return b.total - a.total;
 }
 
-function bestTotalSpots(fnc, middle, radius, distance, entries = 50) {
+function bestTotalSpots(fnc, middle, radius, distance, entries) {
   let spots = [];
   let coordsArray = hexMath.coordsWithinRadius(middle, distance);
   for (i in coordsArray) {
