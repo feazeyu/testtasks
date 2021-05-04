@@ -4,11 +4,11 @@ const hexMath = require("./hexMath");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
 var channel;
-const emoji = { 
+const emoji = {
   crystal: "<:Crystal:757976643363930122>",
-  metal:"<:Metal:757976643493953688>",
-  gas:"<:Gas:757976643204546618>"
-}
+  metal: "<:Metal:757976643493953688>",
+  gas: "<:Gas:757976643204546618>",
+};
 var map;
 var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
@@ -16,8 +16,12 @@ const token = fs.readFileSync("token.txt").toString();
 client.login(token);
 const prefix = "p!";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
-function tooBigRadiusError(radius){
-  return "```Radius " + radius + "?! I can do up to 10. Not like I couldn't calculate it, I'm a smarrt pirrate parrot afterr all! But I'm lazy!```";
+function tooBigRadiusError(radius) {
+  return (
+    "```Radius " +
+    radius +
+    "?! I can do up to 10. Not like I couldn't calculate it, I'm a smarrt pirrate parrot afterr all! But I'm lazy!```"
+  );
 }
 const CellDefinitions = JSON.parse(
   fs.readFileSync("./resources/CELL_DEFINITIONS.json")
@@ -47,6 +51,41 @@ class Hex {
   }
 }
 
+class Entry {
+  constructor(data, createMsgFnc, id) {
+    this.data = data;
+    this.createMsgFnc = createMsgFnc;
+    this.id = id;
+  }
+  sendMsg() {
+    let msg = this.createMsgFnc(this.data);
+    message.channel.send(msg).then(() =>
+      channel.messages.fetch({ limit: 1 }).then((messages) => {
+        let lastMessage = messages.first();
+        lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
+      })
+    );
+  }
+  editMsg(){
+    let msg = this.createMsgFnc(this.data);
+    //TODO
+  }
+  scrollForward(){
+    this.data.pages.page++;
+    if(this.data.pages.page > this.data.pages.limit){
+      this.data.pages.page = 0;
+    }
+    this.editMsg();
+  }
+  scrollBackwards(){
+    this.data.pages.page--;
+    if(this.data.pages.page < 0){
+      this.data.pages.page = this.data.pages.limit;
+    }
+    this.editMsg();
+  }
+}
+
 client.on("message", (message) => {
   let args = message.content.split(" ");
   let harvest;
@@ -55,35 +94,52 @@ client.on("message", (message) => {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss":
-          harvest = bestTotalSpots(rssAt, new hexMath.Coords(args[2], args[3]), args[4], args[5], args[6])
+          harvest = bestTotalSpots(
+            rssAt,
+            new hexMath.Coords(args[2], args[3]),
+            args[4],
+            args[5],
+            args[6]
+          );
           //TODO Osetrit crashe pri nezadani argumentu
-          if(parseInt(args[4]) > 10){
-            message.channel.send(
-              tooBigRadiusError(parseInt(args[4]))
-            );
+          if (parseInt(args[4]) > 10) {
+            message.channel.send(tooBigRadiusError(parseInt(args[4])));
             break;
           }
-         var temp = [];
-         if(args[6] == undefined){
-           args[6] = 10
-         }
-         for(x = 0;x < args[6]; x++){
-           temp.push({name:x+1+". " + harvest[x].coords.gotoCoords(), value: harvest[x].LQ + "<:Salute1:786442517209415710> " + harvest[x].MR + "<:Metal:757976643493953688> " +harvest[x].GR + "<:Gas:757976643204546618> " + harvest[x].CR + "<:Crystal:757976643363930122>" + " | Total: " + harvest[x].total + " | Distance: " + harvest[x].dist})
-          
-        }
-         let msg = new Discord.MessageEmbed()
-	          .setColor('#0099ff')
-          	.setTitle('Best resource spots:')
-          	.setDescription('Fields, Moons and planets for radius: ' + args[4])
-            .addFields(
-              temp
-         )
+          var temp = [];
+          if (args[6] == undefined) {
+            args[6] = 10;
+          }
+          for (x = 0; x < args[6]; x++) {
+            temp.push({
+              name: x + 1 + ". " + harvest[x].coords.gotoCoords(),
+              value:
+                harvest[x].LQ +
+                "<:Salute1:786442517209415710> " +
+                harvest[x].MR +
+                "<:Metal:757976643493953688> " +
+                harvest[x].GR +
+                "<:Gas:757976643204546618> " +
+                harvest[x].CR +
+                "<:Crystal:757976643363930122>" +
+                " | Total: " +
+                harvest[x].total +
+                " | Distance: " +
+                harvest[x].dist,
+            });
+          }
+          let msg = new Discord.MessageEmbed()
+            .setColor("#0099ff")
+            .setTitle("Best resource spots:")
+            .setDescription("Fields, Moons and planets for radius: " + args[4])
+            .addFields(temp);
           message.channel.send(msg).then(() =>
-            channel.messages.fetch({ limit: 1 }).then(messages => {
-            let lastMessage = messages.first();
-              lastMessage.react('◀️').then(() => lastMessage.react('▶️'));
+            channel.messages.fetch({ limit: 1 }).then((messages) => {
+              let lastMessage = messages.first();
+              lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
               //TODO Strankovani pres reakce
-          }));
+            })
+          );
           break;
         case "labor":
           harvest = laborAt(
@@ -106,7 +162,7 @@ client.on("message", (message) => {
               " Total: " +
               harvest.total +
               "```"
-              //TODO pekne vypisovani i pro jine prikazy nez je p! rss
+            //TODO pekne vypisovani i pro jine prikazy nez je p! rss
           );
           break;
         case "planets":
@@ -177,7 +233,9 @@ client.on("message", (message) => {
             );
           }
           break;
-        case "yo": message.channel.send(exampleEmbed);break;
+        case "yo":
+          message.channel.send(exampleEmbed);
+          break;
         case "hex":
           if (args[2] != undefined && args[3] != undefined) {
             let hex = readHex(args[2], args[3]);
@@ -256,7 +314,10 @@ function calculateShips(shipType, moonPts = 0) {
     }
   }
   let shipsPerHour = parseFloat(
-    (60 / (unitPlanner.ships[shipId].time * (0.5 - (moonPts * 5) / 100))).toFixed(1)
+    (
+      60 /
+      (unitPlanner.ships[shipId].time * (0.5 - (moonPts * 5) / 100))
+    ).toFixed(1)
   );
   let rssPerHour = {
     crystal: shipsPerHour * unitPlanner.ships[shipId].crystal,
@@ -264,17 +325,27 @@ function calculateShips(shipType, moonPts = 0) {
     metal: shipsPerHour * unitPlanner.ships[shipId].metal,
   };
   let shipProduction = new Discord.MessageEmbed()
-	.setColor('#0099ff')
-	.setTitle('Ship production: ' + shipsPerHour + " " + shipType + " per hour.")
-	.setDescription('Ship production with maxed out HSA and mic offices.')
-  .addFields(
-    {name:'Metal usage', value: Math.floor(rssPerHour.metal), inline:true},
-    {name:'Gas usage', value:Math.floor(rssPerHour.gas), inline:true},
-    {name:'Crystal usage', value:Math.floor(rssPerHour.crystal), inline:true}
-  )
-	.setTimestamp()
-  return (shipProduction
-    /*"```You'll make: " +
+    .setColor("#0099ff")
+    .setTitle(
+      "Ship production: " + shipsPerHour + " " + shipType + " per hour."
+    )
+    .setDescription("Ship production with maxed out HSA and mic offices.")
+    .addFields(
+      {
+        name: "Metal usage",
+        value: Math.floor(rssPerHour.metal),
+        inline: true,
+      },
+      { name: "Gas usage", value: Math.floor(rssPerHour.gas), inline: true },
+      {
+        name: "Crystal usage",
+        value: Math.floor(rssPerHour.crystal),
+        inline: true,
+      }
+    )
+    .setTimestamp();
+  return shipProduction;
+  /*"```You'll make: " +
     shipsPerHour +
     " " +
     shipType +
@@ -285,25 +356,23 @@ function calculateShips(shipType, moonPts = 0) {
     " gas/h \n" +
     Math.floor(rssPerHour.crystal) +
     " crystals/h ```"*/
-  );
-  
 }
 
-function comparatorTotal(a, b){
+function comparatorTotal(a, b) {
   return b.total - a.total;
 }
 
-function bestTotalSpots(fnc, middle, radius, distance, entries = 50){
+function bestTotalSpots(fnc, middle, radius, distance, entries = 50) {
   let spots = [];
   let coordsArray = hexMath.coordsWithinRadius(middle, distance);
   for (i in coordsArray) {
     let hex = readHexCoords(coordsArray[i]);
     //console.log(hex);
     if (hex.id == 0) {
-      let data = fnc(hex.coords, radius)
+      let data = fnc(hex.coords, radius);
       data["coords"] = hex.coords;
-      data.dist = hexMath.distance(hex.coords,middle);
-      spots.push(data); 
+      data.dist = hexMath.distance(hex.coords, middle);
+      spots.push(data);
     }
   }
   spots.sort(comparatorTotal);
