@@ -37,6 +37,7 @@ const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
 client.login(token);
 const prefix = "p!";
+const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
 const needToSpecifyRadiusError = "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
 const wrongSyntaxErr =
@@ -180,11 +181,26 @@ function checkArguments(args) {
   if (args.r[0] > 10) {
     return tooBigRadiusError(parseInt(args[4]));
   }
+  if (args.r[0] <= 0){
+    return negativeIntegerErr;
+  }
+  if (args.e[0] <= 0){
+    return "```Just tell me to shut up, no need to be mean```";
+  }
   if (!("d" in args) || args.d.length < 2){
     args.d = [0, 0, map.MapRadius];
   }
   if (args.d.length == 2){
     args.d.push[map.MapRadius];
+  }
+  if (args.d[2] == undefined){
+    
+  }
+  if (args.d[2] <= 0){
+    return negativeIntegerErr;
+  }
+  if (args.d[2] > map.MapRadius + 5){
+    return "```The sea is not that big matey!```"
   }
 }
 // p! rss r 4 d -12 25 -> {"r": [r], "d": [-12, 25]}
