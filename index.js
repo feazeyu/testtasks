@@ -10,6 +10,23 @@ const emoji = {
   metal:"<:Metal:757976643493953688>",
   gas:"<:Gas:757976643204546618>"
 }
+const exampleEmbed = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle('Some title')
+	.setURL('https://discord.js.org/')
+	.setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+	.setDescription('Some description here')
+	.setThumbnail('https://i.imgur.com/wSTFkRM.png')
+	.addFields(
+		{ name: 'Regular field title', value: 'Some value here' },
+		{ name: '\u200B', value: '\u200B' },
+		{ name: 'Inline field title', value: 'Some value here', inline: true },
+		{ name: 'Inline field title', value: 'Some value here', inline: true },
+	)
+	.addField('Inline field title', 'Some value here', true)
+	.setImage('https://i.imgur.com/wSTFkRM.png')
+	.setTimestamp()
+	.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
 var map;
 var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
@@ -422,7 +439,12 @@ function precalcRdata(radius) {
     }
   }
 }
-
+function editMessageById(msgId, embed, message){
+  message.channel.messages.fetch(msgId)
+    .then(msg => {
+        msg.edit(embed);
+    }); 
+}
 function rssWithinRadius(middle, radius, types) {
   let HarvestValue = {
     LQ: 0,
