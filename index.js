@@ -3,6 +3,7 @@ const fs = require("fs");
 const hexMath = require("./hexMath");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
+const pageSize = 10;
 var channel;
 const emoji = { 
   crystal: "<:Crystal:757976643363930122>",
@@ -46,7 +47,18 @@ class Hex {
     this.HarvestValue = CellDefinitionsDict[this.id].HarvestValue;
   }
 }
-
+client.on('messageReactionAdd', (reaction, user) => {
+  let message = reaction.message, emoji = reaction.emoji;
+  if (user.bot){
+    return 0;
+  }
+  if (emoji.name == '◀️') {
+          console.log("Back at message: " + message.id)          
+  }
+  else if (emoji.name == '▶️') {
+          console.log("Forward at message: " + message.id)
+  }
+});
 client.on("message", (message) => {
   let args = message.content.split(" ");
   let harvest;
@@ -54,7 +66,7 @@ client.on("message", (message) => {
     //try {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
-        case "rss":
+        case "rss":                            //RSS command
           harvest = bestTotalSpots(rssAt, new hexMath.Coords(args[2], args[3]), args[4], args[5], args[6])
           //TODO Osetrit crashe pri nezadani argumentu
           if(parseInt(args[4]) > 10){
@@ -63,26 +75,30 @@ client.on("message", (message) => {
             );
             break;
           }
-         var temp = [];
+         var pages = [];
          if(args[6] == undefined){
            args[6] = 10
          }
-         for(x = 0;x < args[6]; x++){
-           temp.push({name:x+1+". " + harvest[x].coords.gotoCoords(), value: harvest[x].LQ + "<:Salute1:786442517209415710> " + harvest[x].MR + "<:Metal:757976643493953688> " +harvest[x].GR + "<:Gas:757976643204546618> " + harvest[x].CR + "<:Crystal:757976643363930122>" + " | Total: " + harvest[x].total + " | Distance: " + harvest[x].dist})
-          
+         let iters = 0;
+         for(i = 0; i < Math.ceil(args[6]/pageSize);i++){
+           pages.push([]);
+          for(x = 0; x < pageSize && iters < args[6]; x++){
+              pages[i].push({name:iters+1+". " + harvest[x].coords.gotoCoords(), value: harvest[x].LQ + "<:Salute1:786442517209415710> " + harvest[x].MR + "<:Metal:757976643493953688> " +harvest[x].GR + "<:Gas:757976643204546618> " + harvest[x].CR + "<:Crystal:757976643363930122>" + " | Total: " + harvest[x].total + " | Distance: " + harvest[x].dist})
+              iters++;
+            }
         }
          let msg = new Discord.MessageEmbed()
 	          .setColor('#0099ff')
           	.setTitle('Best resource spots:')
           	.setDescription('Fields, Moons and planets for radius: ' + args[4])
             .addFields(
-              temp
+              pages[1]
          )
           message.channel.send(msg).then(() =>
             channel.messages.fetch({ limit: 1 }).then(messages => {
             let lastMessage = messages.first();
               lastMessage.react('◀️').then(() => lastMessage.react('▶️'));
-              //TODO Strankovani pres reakce
+              //TODO Reaction pages
           }));
           break;
         case "labor":
