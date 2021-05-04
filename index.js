@@ -235,7 +235,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, args, laborAt);
+          bestSpotCommand(message, args, planetsAt);
           break;
         case "fields":
           err = checkArguments(args);
@@ -243,7 +243,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, args, laborAt);
+          bestSpotCommand(message, args, fieldsAt);
           break;
         case "dist":
           if (
@@ -346,9 +346,18 @@ function calculateShips(shipType, moonPts = 0) {
   let shipsPerHour = parseFloat(
     (
       60 /
-      (unitPlanner.ships[shipId].time * (0.5 - (moonPts * 5) / 100))
+      (unitPlanner.ships[shipId].time * (unitPlanner.ships[shipId].maxReduction / 100))
     ).toFixed(1)
+    
   );
+  if(unitPlanner.ships[shipId].moonReduction == true){
+    shipsPerHour = parseFloat(
+      (
+        60 /
+        (unitPlanner.ships[shipId].time * (unitPlanner.ships[shipId].maxReduction - moonPts*5 / 100))
+      ).toFixed(1)
+    )
+  }
   let rssPerHour = {
     crystal: shipsPerHour * unitPlanner.ships[shipId].crystal,
     gas: shipsPerHour * unitPlanner.ships[shipId].gas,
@@ -359,7 +368,7 @@ function calculateShips(shipType, moonPts = 0) {
     .setTitle(
       "Ship production: " + shipsPerHour + " " + shipType + " per hour."
     )
-    .setDescription("Ship production with maxed out HSA and mic offices.")
+    .setDescription(unitPlanner.ships[shipId].note)
     .addFields(
       {
         name: "Metal usage",
