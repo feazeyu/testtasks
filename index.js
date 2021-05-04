@@ -7,26 +7,30 @@ const pageSize = 10;
 var channel;
 const emoji = {
   crystal: "<:Crystal:757976643363930122>",
-  metal:"<:Metal:757976643493953688>",
-  gas:"<:Gas:757976643204546618>"
-}
+  metal: "<:Metal:757976643493953688>",
+  gas: "<:Gas:757976643204546618>",
+};
 const exampleEmbed = new Discord.MessageEmbed()
-	.setColor('#0099ff')
-	.setTitle('Some title')
-	.setURL('https://discord.js.org/')
-	.setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
-	.setDescription('Some description here')
-	.setThumbnail('https://i.imgur.com/wSTFkRM.png')
-	.addFields(
-		{ name: 'Regular field title', value: 'Some value here' },
-		{ name: '\u200B', value: '\u200B' },
-		{ name: 'Inline field title', value: 'Some value here', inline: true },
-		{ name: 'Inline field title', value: 'Some value here', inline: true },
-	)
-	.addField('Inline field title', 'Some value here', true)
-	.setImage('https://i.imgur.com/wSTFkRM.png')
-	.setTimestamp()
-	.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+  .setColor("#0099ff")
+  .setTitle("Some title")
+  .setURL("https://discord.js.org/")
+  .setAuthor(
+    "Some name",
+    "https://i.imgur.com/wSTFkRM.png",
+    "https://discord.js.org"
+  )
+  .setDescription("Some description here")
+  .setThumbnail("https://i.imgur.com/wSTFkRM.png")
+  .addFields(
+    { name: "Regular field title", value: "Some value here" },
+    { name: "\u200B", value: "\u200B" },
+    { name: "Inline field title", value: "Some value here", inline: true },
+    { name: "Inline field title", value: "Some value here", inline: true }
+  )
+  .addField("Inline field title", "Some value here", true)
+  .setImage("https://i.imgur.com/wSTFkRM.png")
+  .setTimestamp()
+  .setFooter("Some footer text here", "https://i.imgur.com/wSTFkRM.png");
 var map;
 var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
@@ -34,7 +38,8 @@ const token = fs.readFileSync("token.txt").toString();
 client.login(token);
 const prefix = "p!";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
-const wrongSyntaxErr = '```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?\n(syntax error)```'; //Wrong syntax error
+const wrongSyntaxErr =
+  "```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?\n(syntax error)```"; //Wrong syntax error
 function tooBigRadiusError(radius) {
   return (
     "```Radius " +
@@ -90,10 +95,9 @@ class Entry {
   }
   editMsg() {
     let embed = this.createMsgFnc(this.data);
-    this.channel.messages.fetch(this.id)
-    .then(msg => {
-        msg.edit(embed);
-    }); 
+    this.channel.messages.fetch(this.id).then((msg) => {
+      msg.edit(embed);
+    });
   }
   scrollForward() {
     this.data.pages.page++;
@@ -105,7 +109,7 @@ class Entry {
   scrollBackwards() {
     this.data.pages.page--;
     if (this.data.pages.page < 0) {
-      this.data.pages.page = this.data.pages.limit-1;
+      this.data.pages.page = this.data.pages.limit - 1;
     }
     this.editMsg();
   }
@@ -134,7 +138,7 @@ function createBestSpotsMsg(data) {
   //console.log(end);
   for (x = begin; x < end; x++) {
     spots.push({
-      name: (x + 1) + ". " + data.harvest[x].coords.gotoCoords(),
+      name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
       value:
         data.harvest[x].LQ +
         "<:Salute1:786442517209415710> " +
@@ -152,155 +156,94 @@ function createBestSpotsMsg(data) {
   }
   //console.log(spots);
   return new Discord.MessageEmbed()
-  .setColor("#0099ff")
-  .setTitle("Best resource spots page " + (data.pages.page+1) + "/" + data.pages.limit + ":")
-  .setDescription("Fields, Moons and planets for radius: " + data.radius)
-  .addFields(spots);
+    .setColor("#0099ff")
+    .setTitle(
+      "Best resource spots page " +
+        (data.pages.page + 1) +
+        "/" +
+        data.pages.limit +
+        ":"
+    )
+    .setDescription("Fields, Moons and planets for radius: " + data.radius)
+    .addFields(spots);
+}
+
+function checkArguments(args){
+  if (args[6] == undefined) {
+    // default size
+    args[6] = 50;
+  }
+  if (parseInt(args[4]) > 10) {
+    return tooBigRadiusError(parseInt(args[4]));
+  }
+}
+
+function bestSpotCommand(message, args, f){
+  harvest = bestTotalSpots(
+    f,
+    new hexMath.Coords(args[2], args[3]),
+    args[4],
+    args[5],
+    args[6]
+  );
+  //TODO Osetrit crashe pri nezadani argumentu
+
+  new_entry = new Entry(
+    {
+      harvest: harvest,
+      radius: args[4],
+      pages: {
+        page: 0,
+        limit: Math.ceil(harvest.length / pageSize),
+      },
+      maxEntries: harvest.length,
+    },
+    createBestSpotsMsg,
+    message.channel
+  );
+  new_entry.sendMsg();
 }
 
 client.on("message", (message) => {
   let args = message.content.split(" ");
   let harvest;
+  let new_entry;
+  let err;
   if (args[0] == prefix) {
     //try {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
         case "rss": //RSS command
-          if (args[6] == undefined) { // default size 
-            args[6] = 50;
-          }
-          harvest = bestTotalSpots(
-            rssAt,
-            new hexMath.Coords(args[2], args[3]),
-            args[4],
-            args[5],
-            args[6]
-          );
-          //TODO Osetrit crashe pri nezadani argumentu
-          if (parseInt(args[4]) > 10) {
-            message.channel.send(tooBigRadiusError(parseInt(args[4])));
+          err = checkArguments(args);
+          if(err){
+            message.channel.send(err);
             break;
           }
-          let new_entry = new Entry({
-            "harvest": harvest,
-            "radius": args[4],
-            "pages":{
-              "page": 0,
-              "limit": Math.ceil(harvest.length/pageSize)
-            },
-            "maxEntries": harvest.length
-          }, createBestSpotsMsg, message.channel);
-          new_entry.sendMsg();
-          /*
-          var pages = [];
-          if (args[6] == undefined) {
-            args[6] = 10;
-          }
-          let iters = 0;
-          for (i = 0; i < Math.ceil(args[6] / pageSize); i++) {
-            pages.push([]);
-            for (x = 0; x < pageSize && iters < args[6]; x++) {
-              pages[i].push({
-                name: iters + 1 + ". " + harvest[x].coords.gotoCoords(),
-                value:
-                  harvest[x].LQ +
-                  "<:Salute1:786442517209415710> " +
-                  harvest[x].MR +
-                  "<:Metal:757976643493953688> " +
-                  harvest[x].GR +
-                  "<:Gas:757976643204546618> " +
-                  harvest[x].CR +
-                  "<:Crystal:757976643363930122>" +
-                  " | Total: " +
-                  harvest[x].total +
-                  " | Distance: " +
-                  harvest[x].dist,
-              });
-              iters++;
-            }
-          }
-          let msg = new Discord.MessageEmbed()
-            .setColor("#0099ff")
-            .setTitle("Best resource spots:")
-            .setDescription("Fields, Moons and planets for radius: " + args[4])
-            .addFields(pages[1]);
-          message.channel.send(msg).then(() =>
-            channel.messages.fetch({ limit: 1 }).then((messages) => {
-              let lastMessage = messages.first();
-              lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
-              //TODO Reaction pages
-            })
-          );*/
+          bestSpotCommand(message, args, rssAt);
           break;
         case "labor":
-          harvest = laborAt(
-            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
-            parseInt(args[4])
-          );
-          message.channel.send(
-            "``` Labor: " +
-              harvest.LQ +
-              " \n" +
-              " Metal: " +
-              harvest.MR +
-              " \n" +
-              " Gas: " +
-              harvest.GR +
-              " \n" +
-              " Crystal: " +
-              harvest.CR +
-              " \n" +
-              " Total: " +
-              harvest.total +
-              "```"
-            //TODO pekne vypisovani i pro jine prikazy nez je p! rss
-          );
+          err = checkArguments(args);
+          if(err){
+            message.channel.send(err);
+            break;
+          }
+          bestSpotCommand(message, args, laborAt);
           break;
         case "planets":
-          harvest = planetsAt(
-            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
-            parseInt(args[4])
-          );
-          message.channel.send(
-            "``` Labor: " +
-              harvest.LQ +
-              " \n" +
-              " Metal: " +
-              harvest.MR +
-              " \n" +
-              " Gas: " +
-              harvest.GR +
-              " \n" +
-              " Crystal: " +
-              harvest.CR +
-              " \n" +
-              " Total: " +
-              harvest.total +
-              "```"
-          );
+          err = checkArguments(args);
+          if(err){
+            message.channel.send(err);
+            break;
+          }
+          bestSpotCommand(message, args, laborAt);
           break;
         case "fields":
-          harvest = fieldsAt(
-            new hexMath.Coords(parseInt(args[2]), parseInt(args[3])),
-            parseInt(args[4])
-          );
-          message.channel.send(
-            "``` Labor: " +
-              harvest.LQ +
-              " \n" +
-              " Metal: " +
-              harvest.MR +
-              " \n" +
-              " Gas: " +
-              harvest.GR +
-              " \n" +
-              " Crystal: " +
-              harvest.CR +
-              " \n" +
-              " Total: " +
-              harvest.total +
-              "```"
-          );
+          err = checkArguments(args);
+          if(err){
+            message.channel.send(err);
+            break;
+          }
+          bestSpotCommand(message, args, laborAt);
           break;
         case "dist":
           if (
@@ -319,9 +262,7 @@ client.on("message", (message) => {
             };
             message.channel.send(hexMath.distance(A, B));
           } else {
-            message.channel.send(
-              wrongSyntaxErr
-            );
+            message.channel.send(wrongSyntaxErr);
           }
           break;
         case "yo":
@@ -332,9 +273,7 @@ client.on("message", (message) => {
             let hex = readHex(args[2], args[3]);
             message.channel.send("Hex: " + hex.id);
           } else {
-            message.channel.send(
-              wrongSyntaxErr
-            );
+            message.channel.send(wrongSyntaxErr);
           }
           break;
         case "ships": //TODO Vice lodi, spravne delanou redukci pro light ships
