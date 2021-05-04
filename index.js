@@ -69,7 +69,7 @@ class Hex {
     this.HarvestValue = CellDefinitionsDict[this.id].HarvestValue;
   }
 }
-
+var entryDict = {};
 class Entry {
   constructor(data, createMsgFnc, channel) {
     this.data = data;
@@ -83,17 +83,21 @@ class Entry {
         let lastMessage = messages.first();
         lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
         this.id = lastMessage.id;
+        entryDict[this.id] = this;
         console.log(this.id);
       })
     );
   }
   editMsg() {
-    let msg = this.createMsgFnc(this.data);
-    //TODO
+    let embed = this.createMsgFnc(this.data);
+    this.channel.messages.fetch(this.id)
+    .then(msg => {
+        msg.edit(embed);
+    }); 
   }
   scrollForward() {
     this.data.pages.page++;
-    if (this.data.pages.page > this.data.pages.limit) {
+    if (this.data.pages.page >= this.data.pages.limit) {
       this.data.pages.page = 0;
     }
     this.editMsg();
@@ -101,31 +105,26 @@ class Entry {
   scrollBackwards() {
     this.data.pages.page--;
     if (this.data.pages.page < 0) {
-      this.data.pages.page = this.data.pages.limit;
+      this.data.pages.page = this.data.pages.limit-1;
     }
     this.editMsg();
   }
 }
 
-<<<<<<< HEAD
 client.on("messageReactionAdd", (reaction, user) => {
   let message = reaction.message,
     emoji = reaction.emoji;
   if (user.bot) {
-=======
-client.on('messageReactionAdd', (reaction, user) => {
-  let message = reaction.message, emoji = reaction.emoji;
-  if (user.bot){
->>>>>>> da135b9bd256f11515959535b954ba855ef8cf6b
     return 0;
   }
   if (emoji.name == "◀️") {
-    console.log("Back at message: " + message.id);
+    reaction.users.remove(user.id);
+    entryDict[message.id].scrollBackwards();
   } else if (emoji.name == "▶️") {
-    console.log("Forward at message: " + message.id);
+    reaction.users.remove(user.id);
+    entryDict[message.id].scrollForward();
   }
 });
-<<<<<<< HEAD
 
 function createBestSpotsMsg(data) {
   let spots = [];
@@ -159,8 +158,6 @@ function createBestSpotsMsg(data) {
   .addFields(spots);
 }
 
-=======
->>>>>>> da135b9bd256f11515959535b954ba855ef8cf6b
 client.on("message", (message) => {
   let args = message.content.split(" ");
   let harvest;
@@ -168,14 +165,10 @@ client.on("message", (message) => {
     //try {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
-<<<<<<< HEAD
         case "rss": //RSS command
           if (args[6] == undefined) { // default size 
             args[6] = 50;
           }
-=======
-        case "rss":
->>>>>>> da135b9bd256f11515959535b954ba855ef8cf6b
           harvest = bestTotalSpots(
             rssAt,
             new hexMath.Coords(args[2], args[3]),
@@ -188,7 +181,6 @@ client.on("message", (message) => {
             message.channel.send(tooBigRadiusError(parseInt(args[4])));
             break;
           }
-<<<<<<< HEAD
           let new_entry = new Entry({
             "harvest": harvest,
             "radius": args[4],
@@ -239,33 +231,6 @@ client.on("message", (message) => {
               //TODO Reaction pages
             })
           );*/
-=======
-         var pages = [];
-         if(args[6] == undefined){
-           args[6] = 10
-         }
-         let iters = 0;
-         for(i = 0; i < Math.ceil(args[6]/pageSize);i++){
-           pages.push([]);
-          for(x = 0; x < pageSize && iters < args[6]; x++){
-              pages[i].push({name:iters+1+". " + harvest[x].coords.gotoCoords(), value: harvest[x].LQ + "<:Salute1:786442517209415710> " + harvest[x].MR + "<:Metal:757976643493953688> " +harvest[x].GR + "<:Gas:757976643204546618> " + harvest[x].CR + "<:Crystal:757976643363930122>" + " | Total: " + harvest[x].total + " | Distance: " + harvest[x].dist})
-              iters++;
-            }
-        }
-         let msg = new Discord.MessageEmbed()
-	          .setColor('#0099ff')
-          	.setTitle('Best resource spots:')
-          	.setDescription('Fields, Moons and planets for radius: ' + args[4])
-            .addFields(
-              pages[0]
-         )
-          message.channel.send(msg).then(() =>
-            channel.messages.fetch({ limit: 1 }).then(messages => {
-            let lastMessage = messages.first();
-              lastMessage.react('◀️').then(() => lastMessage.react('▶️'));
-              //TODO Reaction pages
-          }));
->>>>>>> da135b9bd256f11515959535b954ba855ef8cf6b
           break;
         case "labor":
           harvest = laborAt(
@@ -600,12 +565,6 @@ function precalcRdata(radius) {
       });
     }
   }
-}
-function editMessageById(msgId, embed, message){
-  message.channel.messages.fetch(msgId)
-    .then(msg => {
-        msg.edit(embed);
-    }); 
 }
 function rssWithinRadius(middle, radius, types) {
   let HarvestValue = {
