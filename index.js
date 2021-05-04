@@ -34,6 +34,7 @@ const token = fs.readFileSync("token.txt").toString();
 client.login(token);
 const prefix = "p!";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
+const wrongSyntaxErr = '```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?\n(syntax error)```'; //Wrong syntax error
 function tooBigRadiusError(radius) {
   return (
     "```Radius " +
@@ -250,7 +251,7 @@ client.on("message", (message) => {
             message.channel.send(hexMath.distance(A, B));
           } else {
             message.channel.send(
-              "```Wrrong command usage! \nThe correct one is: p! dist x1 y1 x2 y2```"
+              wrongSyntaxErr
             );
           }
           break;
@@ -263,7 +264,7 @@ client.on("message", (message) => {
             message.channel.send("Hex: " + hex.id);
           } else {
             message.channel.send(
-              "```Wrrong command usage! \nThe correct one is: p! hex x y```"
+              wrongSyntaxErr
             );
           }
           break;
