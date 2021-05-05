@@ -174,7 +174,7 @@ function createBestHsaMsg(data) {
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
       value:
         " Moon Pts.: " +
-        data.reduction[x].total +
+        data.harvest[x].total +
         " | Distance: " +
         data.harvest[x].dist,
     });
@@ -190,6 +190,29 @@ function createBestHsaMsg(data) {
     )
     .setDescription(`${data.textData.stuff}`)
     .addFields(spots);
+}
+
+function checkHsaArguments(args){
+  if (!("e" in args) || args.e.length == 0) {
+    // default size
+    args.e = [50];
+  }
+  if (args.e[0] <= 0) {
+    return "```Just tell me to shut up, no need to be mean```";
+  }
+  if (!("d" in args) || args.d.length < 2) {
+    args.d = [0, 0, map.MapRadius];
+  }
+  if (args.d.length == 2) {
+    args.d.push(map.MapRadius);
+  }
+  if (args.d[2] <= 0) {
+    return negativeIntegerErr;
+  }
+  if (args.d[2] >= 2 * map.MapRadius) {
+    return "```The sea is not that big matey!```";
+  }
+  args.r = [1];
 }
 
 function checkArguments(args) {
@@ -240,7 +263,7 @@ function parseArgs(args) {
   return dict;
 }
 
-function bestSpotCommand(message, args, f, textData) {
+function bestSpotCommand(message, args, f, textData, msgGenFnc) {
   harvest = bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
@@ -261,7 +284,7 @@ function bestSpotCommand(message, args, f, textData) {
       maxEntries: harvest.length,
       textData: textData,
     },
-    createBestSpotsMsg,
+    msgGenFnc,
     message.channel
   );
   new_entry.sendMsg();
@@ -285,7 +308,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, rssAt, {
             title: "resource",
             stuff: "Fields, Planets and Moons",
-          });
+          }, createBestSpotsMsg);
           break;
         case "labor":
           parsedArgs = parseArgs(args);
@@ -297,7 +320,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, laborAt, {
             title: "labor",
             stuff: "Fields, Planets and Moons",
-          });
+          }, createBestSpotsMsg);
           break;
         case "planets":
           parsedArgs = parseArgs(args);
@@ -309,7 +332,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, planetsAt, {
             title: "resource",
             stuff: "Planets and Moons",
-          });
+          }, createBestSpotsMsg);
           break;
         case "fields":
           parsedArgs = parseArgs(args);
@@ -321,7 +344,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, fieldsAt, {
             title: "resource",
             stuff: "Fields",
-          });
+          }, createBestSpotsMsg);
           break;
         case "hsa":
           parsedArgs = parseArgs(args);
