@@ -263,7 +263,7 @@ function parseArgs(args) {
   return dict;
 }
 
-function bestSpotCommand(message, args, f, textData) {
+function bestSpotCommand(message, args, f, textData, msgGenFnc) {
   harvest = bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
@@ -284,7 +284,7 @@ function bestSpotCommand(message, args, f, textData) {
       maxEntries: harvest.length,
       textData: textData,
     },
-    createBestSpotsMsg,
+    msgGenFnc,
     message.channel
   );
   new_entry.sendMsg();
@@ -308,7 +308,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, rssAt, {
             title: "resource",
             stuff: "Fields, Planets and Moons",
-          });
+          }, createBestSpotsMsg);
           break;
         case "labor":
           parsedArgs = parseArgs(args);
@@ -320,7 +320,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, laborAt, {
             title: "labor",
             stuff: "Fields, Planets and Moons",
-          });
+          }, createBestSpotsMsg);
           break;
         case "planets":
           parsedArgs = parseArgs(args);
@@ -332,7 +332,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, planetsAt, {
             title: "resource",
             stuff: "Planets and Moons",
-          });
+          }, createBestSpotsMsg);
           break;
         case "fields":
           parsedArgs = parseArgs(args);
@@ -344,7 +344,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, fieldsAt, {
             title: "resource",
             stuff: "Fields",
-          });
+          }, createBestSpotsMsg);
           break;
         case "hsa":
           parsedArgs = parseArgs(args);
@@ -356,7 +356,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, hsaAt, {
             title: "resource",
             stuff: "Fields",
-          });
+          }, createBestHsaMsg);
           break;
         case "dist":
           if (
