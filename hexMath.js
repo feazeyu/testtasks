@@ -49,8 +49,8 @@ function coordsWithinRadius(middle, radius) {
   if (radius <= 0 || Math.floor(radius) != radius) {
     throw "radius : " + radius + " has to be positive integer!";
   }
-  coords = [];
-  for (let dist = radius; dist >= 1; dist--) {
+  coords = [middle];
+  for (let dist = 1; dist <= radius; dist++) {
     //console.log("Hexmath: " + coordsWithDistFrom(middle, dist).length);
     coords = coords.concat(coordsWithDistFrom(middle, dist));
   }

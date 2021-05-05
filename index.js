@@ -159,7 +159,7 @@ function createBestSpotsMsg(data) {
         data.pages.limit
       }:`
     )
-    .setDescription(`${data.textData.stuff} for radius: ${data.radius}`)
+    .setDescription(`${data.textData.stuff} \n\tfor radius: ${data.radius} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
     .addFields(spots);
 }
 
@@ -188,7 +188,7 @@ function createBestHsaMsg(data) {
         data.pages.limit
       }:`
     )
-    .setDescription(`${data.textData.stuff}`)
+    .setDescription(`${data.textData.stuff} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
     .addFields(spots);
 }
 
@@ -277,6 +277,8 @@ function bestSpotCommand(message, args, f, textData, msgGenFnc) {
     {
       harvest: harvest,
       radius: args.r[0],
+      middle: new hexMath.Coords(args.d[0], args.d[1]),
+      maxDistance: args.d[2],
       pages: {
         page: 0,
         limit: Math.ceil(harvest.length / pageSize),
