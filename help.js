@@ -15,6 +15,8 @@ function help(command) {
         return rsshelp("This command shows best spots by total Resources from Planets and Moons whithin selected radius");
     case "fields":
         return rsshelp("This command shows best spots by total Resources from Fields whithin selected radius");
+    case "hsa":
+        return hsahelp();
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
@@ -77,6 +79,35 @@ optional arguments are:
             e 50
 
 `
+
+return msg;
+
+}
+
+function hsahelp(){
+    let msg = `
+This command shows best spots by total HSA reduction from Moons whithin radius 1
+
+required arguments are:
+    none
+
+optional arguments are:
+    d:  hex_x hex_y max_distance
+
+        hex_x, hex_y: selects coordinates of a hex [hex_x, hex_y]. All distances are calculated in respect to the hex.
+        max_distance: The command will show only hexes that have distance at most max_distane from [hex_x, hex_y]
+
+        default values:
+            d 0 0 map_radius
+
+    e: entries
+
+        entries: selects the number of top hexes shown
+
+        default values:
+            e 50
+
+`;
 
 return msg;
 
