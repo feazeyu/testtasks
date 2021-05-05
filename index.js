@@ -118,14 +118,14 @@ function createBestSpotsMsg(data) {
     spots.push({
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
       value:
-        data.harvest[x].LQ +
-        "<:Salute1:786442517209415710> " +
         data.harvest[x].MR +
         "<:Metal:757976643493953688> " +
         data.harvest[x].GR +
         "<:Gas:757976643204546618> " +
         data.harvest[x].CR +
-        "<:Crystal:757976643363930122>" +
+        "<:Crystal:757976643363930122> " +
+        data.harvest[x].LQ +
+        "<:labor:839506095864676363>" +
         " | Total: " +
         data.harvest[x].total +
         " | Distance: " +
