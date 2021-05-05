@@ -356,7 +356,7 @@ client.on("message", (message) => {
           bestSpotCommand(message, parsedArgs, hsaAt, {
             title: "hsa",
             stuff: "Moons",
-          });
+          }, createBestHsaMsg);
           break;
         case "dist":
           if (
