@@ -331,8 +331,8 @@ client.on("message", (message) => {
             break;
           }
           bestSpotCommand(message, parsedArgs, hsaAt, {
-            title: "resource",
-            stuff: "Fields",
+            title: "hsa",
+            stuff: "Moons",
           });
           break;
         case "dist":
