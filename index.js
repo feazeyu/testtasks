@@ -39,8 +39,12 @@ client.login(token);
 const prefix = "!p";
 const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
-function reqArgsOmmitedErr(command){
-  return "```" + `You forrgot some rrequirred arguments, type "!p help ${command}" forr help` + "```";
+function reqArgsOmmitedErr(command) {
+  return (
+    "```" +
+    `You forrgot some rrequirred arguments, type "!p help ${command}" forr help` +
+    "```"
+  );
 }
 const needToSpecifyRadiusError =
   "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
@@ -57,7 +61,7 @@ function tooBigRadiusError(radius) {
 client.once("ready", () => {
   console.log("Ready!");
   channel = client.channels.cache.get("838491827400212513");
-  client.user.setActivity('!p help', { type: 'LISTENING' })
+  client.user.setActivity("!p help", { type: "LISTENING" });
 });
 var entryDict = {};
 class Entry {
@@ -141,7 +145,13 @@ function createBestSpotsMsg(data) {
         data.pages.limit
       }:`
     )
-    .setDescription(`${data.textData.stuff} \n\tfor radius: ${data.radius} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
+    .setDescription(
+      `${data.textData.stuff} \n\tfor radius: ${
+        data.radius
+      } \n\tfor distance up to ${
+        data.maxDistance
+      } from ${data.middle.gotoCoords()}`
+    )
     .addFields(spots);
 }
 
@@ -170,23 +180,81 @@ function createBestHsaMsg(data) {
         data.pages.limit
       }:`
     )
-    .setDescription(`${data.textData.stuff} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
+    .setDescription(
+      `${data.textData.stuff} \n\tfor distance up to ${
+        data.maxDistance
+      } from ${data.middle.gotoCoords()}`
+    )
     .addFields(spots);
 }
 
-function checkRtimeArguments(args){
-  if (!("f" in args) || args.f.length < 2) {
+function twoDigitFormat(num){
+  if(num >= 10){
+    return num.toString(10);
+  } else {
+    return "0" + num.toString(10);
+  }
+}
+
+function calcRtime(args){
+  let origin = new hexMath.Coords(args.o[0], args.o[1]);
+  let destination = new hexMath.Coords(args.d[0], args.d[1]);
+  let speed = args.s[0];
+  let impact_time_seconds = args.t[2] + 60 * args.t[1] + 3600 * args.t[0];
+  let distance = hexMath.distance(origin, destination);
+  let travel_time_seconds = Math.floor(distance * 3600 / speed + hexMath.eps);
+  let return_time_seconds = impact_time_seconds + travel_time_seconds;
+  let secs = return_time_seconds % 60;
+  let return_time_minutes = Math.floor(return_time_seconds/60 + hexMath.eps);
+  let mins = return_time_minutes % 60;
+  let return_time_hours = Math.floor(return_time_minutes/60 + hexMath.eps);
+  let hours = return_time_hours % 60;
+  let days = Math.floor(return_time_hours/24);
+  let msg = "```" +
+`Fleets
+from hex: ${origin.gotoCoords()}
+to hex: ${destination.gotoCoords()}
+with speed: ${speed}
+with impact time: ${args.t[0]}:${args.t[1]}:${args.t[2]}
+will return `
+  switch(days){
+    case 0:
+      msg += "today";
+      break;
+    case 1:
+      msg += "tomorrow";
+      break;
+    default:
+      msg += `in ${days} days`
+      break;
+  }
+  msg += ` at: ${twoDigitFormat(hours)}:${twoDigitFormat(mins)}:${twoDigitFormat(secs)} `;
+  msg += "```";
+  return msg;
+}
+
+function checkRtimeArguments(args) {
+  if (!("o" in args) || args.o.length < 2) {
     return reqArgsOmmitedErr("rtime");
   }
-  if (!("t" in args) || args.t.length < 2) {
+  if (!("d" in args) || args.d.length < 2) {
     return reqArgsOmmitedErr("rtime");
   }
   if (!("s" in args) || args.s.length < 1) {
     return reqArgsOmmitedErr("rtime");
   }
+  if (args.s[0] <= 0){
+    return "```Those boats look rreally slow how would they manage to move with " + args.s[0] + "speed?! Did they get drunk and sail the wrong direction?!```";
+  }
+  if (!("t" in args) || args.t.length < 3) {
+    return reqArgsOmmitedErr("rtime");
+  }
+  if (args.t[2] < 0 || args.t[2] >= 60 || args.t[1] < 0 || args.t[1] >= 60 || args.t[0] < 0 || args.t[0] >= 24){
+    return "```Wrrong time forrmat!```";
+  }
 }
 
-function checkHsaArguments(args){
+function checkHsaArguments(args) {
   if (!("e" in args) || args.e.length == 0) {
     // default size
     args.e = [50];
@@ -296,10 +364,10 @@ client.on("message", (message) => {
       switch (args[1].toLowerCase()) {
         case "help":
           let helpMsg;
-          if(args[2]){
+          if (args[2]) {
             helpMsg = help.help(args[2]);
           } else {
-            helpMsg = help.help("help")
+            helpMsg = help.help("help");
           }
           message.channel.send("```" + helpMsg + "```");
           break;
@@ -310,10 +378,16 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.rssAt, {
-            title: "resource",
-            stuff: "Fields, Planets and Moons",
-          }, createBestSpotsMsg);
+          bestSpotCommand(
+            message,
+            parsedArgs,
+            mapCalcs.atFuncs.rssAt,
+            {
+              title: "resource",
+              stuff: "Fields, Planets and Moons",
+            },
+            createBestSpotsMsg
+          );
           break;
         case "labor":
           parsedArgs = parseArgs(args);
@@ -322,10 +396,16 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.laborAt, {
-            title: "labor",
-            stuff: "Fields, Planets and Moons",
-          }, createBestSpotsMsg);
+          bestSpotCommand(
+            message,
+            parsedArgs,
+            mapCalcs.atFuncs.laborAt,
+            {
+              title: "labor",
+              stuff: "Fields, Planets and Moons",
+            },
+            createBestSpotsMsg
+          );
           break;
         case "planets":
           parsedArgs = parseArgs(args);
@@ -334,10 +414,16 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.planetsAt, {
-            title: "resource",
-            stuff: "Planets and Moons",
-          }, createBestSpotsMsg);
+          bestSpotCommand(
+            message,
+            parsedArgs,
+            mapCalcs.atFuncs.planetsAt,
+            {
+              title: "resource",
+              stuff: "Planets and Moons",
+            },
+            createBestSpotsMsg
+          );
           break;
         case "fields":
           parsedArgs = parseArgs(args);
@@ -346,10 +432,16 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.fieldsAt, {
-            title: "resource",
-            stuff: "Fields",
-          }, createBestSpotsMsg);
+          bestSpotCommand(
+            message,
+            parsedArgs,
+            mapCalcs.atFuncs.fieldsAt,
+            {
+              title: "resource",
+              stuff: "Fields",
+            },
+            createBestSpotsMsg
+          );
           break;
         case "hsa":
           parsedArgs = parseArgs(args);
@@ -358,18 +450,25 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.hsaAt, { 
-            title: "hsa",
-            stuff: "Moons",
-          }, createBestHsaMsg);
+          bestSpotCommand(
+            message,
+            parsedArgs,
+            mapCalcs.atFuncs.hsaAt,
+            {
+              title: "hsa",
+              stuff: "Moons",
+            },
+            createBestHsaMsg
+          );
           break;
         case "rtime":
           parsedArgs = parseArgs(args);
-          err = checkRtimeArguments(args);
+          err = checkRtimeArguments(parsedArgs);
           if (err) {
             message.channel.send(err);
             break;
           }
+          message.channel.send(calcRtime(parsedArgs));
           break;
         case "dist":
           if (
@@ -391,7 +490,7 @@ client.on("message", (message) => {
             message.channel.send(wrongSyntaxErr);
           }
           break;
-          /*
+        /*
         case "yo":
           message.channel.send(exampleEmbed);
           break;*/
