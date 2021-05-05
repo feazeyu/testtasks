@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 const hexMath = require("./hexMath");
+const mapCalcs = require("./mapCalcs");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
 const pageSize = 10;
@@ -31,8 +32,6 @@ const exampleEmbed = new Discord.MessageEmbed()
   .setImage("https://i.imgur.com/wSTFkRM.png")
   .setTimestamp()
   .setFooter("Some footer text here", "https://i.imgur.com/wSTFkRM.png");
-var map;
-var hexArray = [];
 const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
 client.login(token);
@@ -50,33 +49,13 @@ function tooBigRadiusError(radius) {
     "?! I can do up to 10. Not like I couldn't calculate it, I'm a smarrt pirrate parrot afterr all! But I'm lazy!```"
   );
 }
-const CellDefinitions = JSON.parse(
-  fs.readFileSync("./resources/CELL_DEFINITIONS.json")
-);
-var CellDefinitionsDict = {};
-var rData = {};
-function initCellDefinitionDict() {
-  for (x = 0; x < CellDefinitions.length; x++) {
-    CellDefinitionsDict[CellDefinitions[x].Id] = CellDefinitions[x];
-  }
-}
-initCellDefinitionDict();
+
 client.once("ready", () => {
   console.log("Ready!");
   channel = client.channels.cache.get("838491827400212513");
 });
 
-class Hex {
-  constructor(Q, R, id) {
-    this.coords = new hexMath.Coords(Q, R);
-    this.id = id;
-    this.type = id.toString().charAt(0); //1 Planet 2 Field 3 Moon
-    if (this.type == "3") {
-      this.size = CellDefinitionsDict[this.id].Size;
-    }
-    this.HarvestValue = CellDefinitionsDict[this.id].HarvestValue;
-  }
-}
+
 var entryDict = {};
 class Entry {
   constructor(data, createMsgFnc, channel) {
@@ -201,15 +180,15 @@ function checkHsaArguments(args){
     return "```Just tell me to shut up, no need to be mean```";
   }
   if (!("d" in args) || args.d.length < 2) {
-    args.d = [0, 0, map.MapRadius];
+    args.d = [0, 0, mapCalcs.mapRadius];
   }
   if (args.d.length == 2) {
-    args.d.push(map.MapRadius);
+    args.d.push(mapCalcs.mapRadius);
   }
   if (args.d[2] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.d[2] >= 2 * map.MapRadius) {
+  if (args.d[2] >= 2 * mapCalcs.mapRadius) {
     return "```The sea is not that big matey!```";
   }
   args.r = [1];
@@ -233,15 +212,15 @@ function checkArguments(args) {
     return "```Just tell me to shut up, no need to be mean```";
   }
   if (!("d" in args) || args.d.length < 2) {
-    args.d = [0, 0, map.MapRadius];
+    args.d = [0, 0, mapCalcs.mapRadius];
   }
   if (args.d.length == 2) {
-    args.d.push(map.MapRadius);
+    args.d.push(mapCalcs.mapRadius);
   }
   if (args.d[2] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.d[2] >= 2 * map.MapRadius) {
+  if (args.d[2] >= 2 * mapCalcs.mapRadius) {
     return "```The sea is not that big matey!```";
   }
 }
@@ -264,7 +243,7 @@ function parseArgs(args) {
 }
 
 function bestSpotCommand(message, args, f, textData, msgGenFnc) {
-  harvest = bestTotalSpots(
+  harvest = mapCalcs.bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
     args.r[0],
@@ -307,7 +286,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, rssAt, {
+          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.rssAt, {
             title: "resource",
             stuff: "Fields, Planets and Moons",
           }, createBestSpotsMsg);
@@ -319,7 +298,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, laborAt, {
+          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.laborAt, {
             title: "labor",
             stuff: "Fields, Planets and Moons",
           }, createBestSpotsMsg);
@@ -331,7 +310,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, planetsAt, {
+          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.planetsAt, {
             title: "resource",
             stuff: "Planets and Moons",
           }, createBestSpotsMsg);
@@ -343,7 +322,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, fieldsAt, {
+          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.fieldsAt, {
             title: "resource",
             stuff: "Fields",
           }, createBestSpotsMsg);
@@ -355,7 +334,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, hsaAt, {
+          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.hsaAt, {
             title: "hsa",
             stuff: "Moons",
           }, createBestHsaMsg);
@@ -417,39 +396,6 @@ client.on("message", (message) => {
     }*/
 });
 
-loadMap("./resources/map.json");
-function loadMap(path) {
-  let data = "";
-  map = JSON.parse(fs.readFileSync(path));
-  for (q = -map.MapRadius; q <= map.MapRadius; q++) {
-    hexArray.push([]);
-    for (r = -map.MapRadius; r <= map.MapRadius; r++) {
-      hexArray[q + map.MapRadius].push(new Hex(q, r, 0)); //Create a 2d array for further population.
-    }
-  }
-  for (x = 0; x < map.Templates.length; x++) {
-    for (i = 0; i < map.Templates[x].Hexes.length; i++) {
-      hexArray[map.Templates[x].Hexes[i].Position.Q + map.MapRadius][
-        map.Templates[x].Hexes[i].Position.R + map.MapRadius
-      ] = new Hex(
-        map.Templates[x].Hexes[i].Position.Q,
-        map.Templates[x].Hexes[i].Position.R,
-        map.Templates[x].Hexes[i].ContentID
-      );
-      //data += "{ Position: { Q: " + map.Templates[x].Hexes[i].Position.Q + ", R: " + map.Templates[x].Hexes[i].Position.R + " }, ContentID: " +  map.Templates[x].Hexes[i].ContentID + "},\n"
-    }
-  }
-}
-function readHexCoords(coords) {
-  return readHex(coords.Q, coords.R);
-}
-function readHex(q, r) {
-  if (Math.abs(q) > map.MapRadius || Math.abs(r) > map.MapRadius) {
-    return new Hex(q, r, 0);
-  }
-  //console.log("Q: " + q + " R: " + r);
-  return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
-}
 function calculateShips(shipType, moonPts = 0) {
   let shipId = NaN;
   for (x = 0; x < unitPlanner.ships.length; x++) {
@@ -513,172 +459,4 @@ function calculateShips(shipType, moonPts = 0) {
     " crystals/h ```"*/
 }
 
-function comparatorTotal(a, b) {
-  return b.total - a.total;
-}
-
-function bestTotalSpots(fnc, middle, radius, distance, entries) {
-  let spots = [];
-  let coordsArray = hexMath.coordsWithinRadius(middle, distance);
-  for (i in coordsArray) {
-    let hex = readHexCoords(coordsArray[i]);
-    //console.log(hex);
-    if (hex.id == 0) {
-      let data = fnc(hex.coords, radius);
-      data["coords"] = hex.coords;
-      data.dist = hexMath.distance(hex.coords, middle);
-      spots.push(data);
-    }
-  }
-  spots.sort(comparatorTotal);
-  return spots.slice(0, Math.min(entries, spots.length));
-}
-
-function hsaAt(coords) {
-  let data = accessRdata(coords, 1);
-  let reductionValue = {
-    hsaRed: data["1"].hsaRed,
-    total: data["1"].hsaRed,
-  };
-  return reductionValue;
-}
-
-function rssAt(coords, radius) {
-  let data = accessRdata(coords, radius);
-  //console.log(data);
-  let HarvestValue = {
-    LQ: data["1"].LQ + data["2"].LQ,
-    MR: data["1"].MR + data["2"].MR,
-    GR: data["1"].GR + data["2"].GR,
-    CR: data["1"].CR + data["2"].CR,
-  };
-  HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
-  return HarvestValue;
-}
-
-function laborAt(coords, radius) {
-  let data = accessRdata(coords, radius);
-  let HarvestValue = {
-    LQ: data["1"].LQ + data["2"].LQ,
-    MR: data["1"].MR + data["2"].MR,
-    GR: data["1"].GR + data["2"].GR,
-    CR: data["1"].CR + data["2"].CR,
-  };
-  HarvestValue["total"] = HarvestValue.LQ;
-  return HarvestValue;
-}
-
-function fieldsAt(coords, radius) {
-  let data = accessRdata(coords, radius);
-  let HarvestValue = {
-    LQ: data["2"].LQ,
-    MR: data["2"].MR,
-    GR: data["2"].GR,
-    CR: data["2"].CR,
-  };
-  HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
-  return HarvestValue;
-}
-
-function planetsAt(coords, radius) {
-  let data = accessRdata(coords, radius);
-  let HarvestValue = {
-    LQ: data["1"].LQ,
-    MR: data["1"].MR,
-    GR: data["1"].GR,
-    CR: data["1"].CR,
-  };
-  HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
-  return HarvestValue;
-}
-
-function accessRdata(coords, radius) {
-  //console.log("acessing data within r: " + radius + " at:");
-  //console.log(coords);
-  if (!rData[radius]) {
-    //console.log("precalcing data");
-    precalcRdata(radius);
-  }
-  if (
-    Math.abs(coords.Q) > map.MapRadius ||
-    Math.abs(coords.R) > map.MapRadius
-  ) {
-    return {
-      1: {
-        LQ: 0,
-        MR: 0,
-        GR: 0,
-        CR: 0,
-        hsaRed: 0,
-      },
-      2: {
-        LQ: 0,
-        MR: 0,
-        GR: 0,
-        CR: 0,
-        hsaRed: 0,
-      },
-    };
-  }
-
-  return rData[radius][coords.Q + map.MapRadius][coords.R + map.MapRadius];
-}
-
-function precalcRdata(radius) {
-  console.log("precalcing data for r: " + radius);
-  if (rData[radius]) {
-    console.log("data already precalced");
-    return;
-  }
-  rData[radius] = [];
-  for (let q = -map.MapRadius; q <= map.MapRadius; q++) {
-    rData[radius].push([]);
-    for (let r = -map.MapRadius; r <= map.MapRadius; r++) {
-      rData[radius][q + map.MapRadius].push({
-        1: rssWithinRadius(new hexMath.Coords(q, r), radius, ["1", "3"]),
-        2: rssWithinRadius(new hexMath.Coords(q, r), radius, ["2"]),
-      });
-    }
-  }
-}
-
-function redFromSize(size) {
-  switch (size) {
-    case "Small":
-      return 1;
-    case "Medium":
-      return 2;
-    case "Large":
-      return 3;
-    default:
-      throw `Unknown moon size: ${size}`;
-  }
-}
-
-function rssWithinRadius(middle, radius, types) {
-  let HarvestValue = {
-    LQ: 0,
-    MR: 0,
-    GR: 0,
-    CR: 0,
-    hsaRed: 0,
-  };
-  //console.log("Cords with rad: " + hexMath.coordsWithinRadius(middle, radius));
-  let coordsArray = hexMath.coordsWithinRadius(middle, radius);
-  for (i in coordsArray) {
-    let hex = readHexCoords(coordsArray[i]);
-    //console.log(hex);
-    if (types.includes(hex.type)) {
-      for (key in hex.HarvestValue) {
-        HarvestValue[key] += parseInt(hex.HarvestValue[key]);
-      }
-      if (hex.type == "3") {
-        HarvestValue.hsaRed += redFromSize(hex.size);
-      }
-    }
-  }
-  return HarvestValue;
-}
-
-var testHex = new Hex(10, 10, 303);
 hexMath.runTests();
