@@ -24,7 +24,7 @@ function help(command) {
         "This command shows best spots by total Resources from Fields whithin selected radius"
       );
     case "hsa":
-      return hsahelp();
+      return hsaHelp();
     case "rtime":
       return rtimeHelp();
     default:
@@ -93,7 +93,7 @@ optional arguments are:
   return msg;
 }
 
-function hsahelp() {
+function hsaHelp() {
   let msg = `
 This command shows best spots by total HSA reduction from Moons whithin radius 1
 
