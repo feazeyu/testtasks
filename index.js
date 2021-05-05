@@ -192,6 +192,29 @@ function createBestHsaMsg(data) {
     .addFields(spots);
 }
 
+function checkHsaArguments(args){
+  if (!("e" in args) || args.e.length == 0) {
+    // default size
+    args.e = [50];
+  }
+  if (args.e[0] <= 0) {
+    return "```Just tell me to shut up, no need to be mean```";
+  }
+  if (!("d" in args) || args.d.length < 2) {
+    args.d = [0, 0, map.MapRadius];
+  }
+  if (args.d.length == 2) {
+    args.d.push(map.MapRadius);
+  }
+  if (args.d[2] <= 0) {
+    return negativeIntegerErr;
+  }
+  if (args.d[2] >= 2 * map.MapRadius) {
+    return "```The sea is not that big matey!```";
+  }
+  args.r = [1];
+}
+
 function checkArguments(args) {
   if (!("e" in args) || args.e.length == 0) {
     // default size
