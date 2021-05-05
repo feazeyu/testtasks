@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const hexMath = require("./hexMath");
 const mapCalcs = require("./mapCalcs");
+const help = require("./help.js");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
 const pageSize = 10;
@@ -35,7 +36,7 @@ const exampleEmbed = new Discord.MessageEmbed()
 const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
 client.login(token);
-const prefix = "p!";
+const prefix = "!p";
 const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
 const needToSpecifyRadiusError =
@@ -279,6 +280,15 @@ client.on("message", (message) => {
     //try {
     if (args.length > 1) {
       switch (args[1].toLowerCase()) {
+        case "help":
+          let helpMsg;
+          if(args[2]){
+            helpMsg = help.help(args[2]);
+          } else {
+            helpMsg = help.help("help")
+          }
+          message.channel.send("```" + helpMsg + "```");
+          break;
         case "rss": //RSS command
           parsedArgs = parseArgs(args);
           err = checkArguments(parsedArgs);
@@ -334,7 +344,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.hsaAt, {
+          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.hsaAt, { 
             title: "hsa",
             stuff: "Moons",
           }, createBestHsaMsg);
