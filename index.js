@@ -42,7 +42,7 @@ const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unk
 const needToSpecifyRadiusError =
   "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
 const wrongSyntaxErr =
-  "```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?\n(syntax error)```"; //Wrong syntax error
+  "```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?```"; //Wrong syntax error
 function tooBigRadiusError(radius) {
   return (
     "```Radius " +
@@ -368,9 +368,10 @@ client.on("message", (message) => {
             message.channel.send(wrongSyntaxErr);
           }
           break;
+          /*
         case "yo":
           message.channel.send(exampleEmbed);
-          break;
+          break;*/
         case "hex":
           if (args[2] != undefined && args[3] != undefined) {
             let hex = readHex(args[2], args[3]);
@@ -389,11 +390,11 @@ client.on("message", (message) => {
           }
           break;
         default:
-          message.channel.send(unknownCommandErr);
+          message.channel.send(wrongSyntaxErr);
           break;
       }
     } else {
-      message.channel.send(unknownCommandErr);
+      message.channel.send(wrongSyntaxErr);
     }
   }
   /*} catch (e) {

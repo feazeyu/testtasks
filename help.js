@@ -8,15 +8,23 @@ function help(command) {
     case "help":
       return baseHelp();
     case "rss":
-        return rsshelp("This command shows best spots by total Resources from Fields, Planets and Moons whithin selected radius");
+      return rsshelp(
+        "This command shows best spots by total Resources from Fields, Planets and Moons whithin selected radius"
+      );
     case "labor":
-        return rsshelp("This command shows best spots by total Labor from Fields, Planets and Moons whithin selected radius");
+      return rsshelp(
+        "This command shows best spots by total Labor from Fields, Planets and Moons whithin selected radius"
+      );
     case "planets":
-        return rsshelp("This command shows best spots by total Resources from Planets and Moons whithin selected radius");
+      return rsshelp(
+        "This command shows best spots by total Resources from Planets and Moons whithin selected radius"
+      );
     case "fields":
-        return rsshelp("This command shows best spots by total Resources from Fields whithin selected radius");
+      return rsshelp(
+        "This command shows best spots by total Resources from Fields whithin selected radius"
+      );
     case "hsa":
-        return hsahelp();
+      return hsahelp();
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
@@ -53,9 +61,9 @@ For further help about a command type:
   return msg;
 }
 
-function rsshelp(text){
-    let msg = text;
-    msg += `
+function rsshelp(text) {
+  let msg = text;
+  msg += `
 
 required arguments are:
     r:  radius
@@ -66,36 +74,7 @@ optional arguments are:
     d:  hex_x hex_y max_distance
 
         hex_x, hex_y: selects coordinates of a hex [hex_x, hex_y]. All distances are calculated in respect to the hex.
-        max_distance: The command will show only hexes that have distance at most max_distane from [hex_x, hex_y]
-
-        default values:
-            d 0 0 map_radius
-
-    e: entries
-
-        entries: selects the number of top hexes shown
-
-        default values:
-            e 50
-
-`
-
-return msg;
-
-}
-
-function hsahelp(){
-    let msg = `
-This command shows best spots by total HSA reduction from Moons whithin radius 1
-
-required arguments are:
-    none
-
-optional arguments are:
-    d:  hex_x hex_y max_distance
-
-        hex_x, hex_y: selects coordinates of a hex [hex_x, hex_y]. All distances are calculated in respect to the hex.
-        max_distance: The command will show only hexes that have distance at most max_distane from [hex_x, hex_y]
+        max_distance: The command will show only hexes that have distance at most max_distance from [hex_x, hex_y]
 
         default values:
             d 0 0 map_radius
@@ -109,8 +88,35 @@ optional arguments are:
 
 `;
 
-return msg;
+  return msg;
+}
 
+function hsahelp() {
+  let msg = `
+This command shows best spots by total HSA reduction from Moons whithin radius 1
+
+required arguments are:
+    none
+
+optional arguments are:
+    d:  hex_x hex_y max_distance
+
+        hex_x, hex_y: selects coordinates of a hex [hex_x, hex_y]. All distances are calculated in respect to the hex.
+        max_distance: The command will show only hexes that have distance at most max_distance from [hex_x, hex_y]
+
+        default values:
+            d 0 0 map_radius
+
+    e: entries
+
+        entries: selects the number of top hexes shown
+
+        default values:
+            e 50
+
+`;
+
+  return msg;
 }
 
 exports.help = help;
