@@ -174,7 +174,7 @@ function createBestHsaMsg(data) {
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
       value:
         " Moon Pts.: " +
-        data.reduction[x].total +
+        data.harvest[x].total +
         " | Distance: " +
         data.harvest[x].dist,
     });
