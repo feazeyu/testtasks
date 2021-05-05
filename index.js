@@ -191,15 +191,12 @@ function checkArguments(args) {
     args.d = [0, 0, map.MapRadius];
   }
   if (args.d.length == 2){
-    args.d.push[map.MapRadius];
-  }
-  if (args.d[2] == undefined){
-    
+    args.d.push(map.MapRadius);
   }
   if (args.d[2] <= 0){
     return negativeIntegerErr;
   }
-  if (args.d[2] > map.MapRadius + 5){
+  if (args.d[2] >= 2*map.MapRadius){
     return "```The sea is not that big matey!```"
   }
 }
@@ -280,7 +277,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, args, planetsAt);
+          bestSpotCommand(message, parsedArgs, planetsAt);
           break;
         case "fields":
           parsedArgs = parseArgs(args);
@@ -289,7 +286,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, args, fieldsAt);
+          bestSpotCommand(message, parsedArgs, fieldsAt);
           break;
         case "dist":
           if (
