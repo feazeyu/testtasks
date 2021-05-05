@@ -54,9 +54,8 @@ function tooBigRadiusError(radius) {
 client.once("ready", () => {
   console.log("Ready!");
   channel = client.channels.cache.get("838491827400212513");
+  client.user.setActivity('!p help', { type: 'LISTENING' })
 });
-
-
 var entryDict = {};
 class Entry {
   constructor(data, createMsgFnc, channel) {
