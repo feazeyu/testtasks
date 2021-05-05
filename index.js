@@ -39,7 +39,8 @@ client.login(token);
 const prefix = "p!";
 const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
-const needToSpecifyRadiusError = "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
+const needToSpecifyRadiusError =
+  "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
 const wrongSyntaxErr =
   "```CaaCaaaw! Where is me rum swabbie? Did you use yer face to type that command?!?\n(syntax error)```"; //Wrong syntax error
 function tooBigRadiusError(radius) {
@@ -160,13 +161,9 @@ function createBestSpotsMsg(data) {
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
-      "Best resource spots page " +
-        (data.pages.page + 1) +
-        "/" +
-        data.pages.limit +
-        ":"
+      `Best ${data.textData.title} spots page ${data.pages.page + 1}/${data.pages.limit}:`
     )
-    .setDescription("Fields, Moons and planets for radius: " + data.radius)
+    .setDescription(`${data.textData.stuff} for radius: ${data.radius}`)
     .addFields(spots);
 }
 
@@ -175,29 +172,29 @@ function checkArguments(args) {
     // default size
     args.e = [50];
   }
-  if (!("r" in args) || args.r.length == 0){
+  if (!("r" in args) || args.r.length == 0) {
     return needToSpecifyRadiusError;
   }
   if (args.r[0] > 10) {
     return tooBigRadiusError(parseInt(args[4]));
   }
-  if (args.r[0] <= 0){
+  if (args.r[0] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.e[0] <= 0){
+  if (args.e[0] <= 0) {
     return "```Just tell me to shut up, no need to be mean```";
   }
-  if (!("d" in args) || args.d.length < 2){
+  if (!("d" in args) || args.d.length < 2) {
     args.d = [0, 0, map.MapRadius];
   }
-  if (args.d.length == 2){
+  if (args.d.length == 2) {
     args.d.push(map.MapRadius);
   }
-  if (args.d[2] <= 0){
+  if (args.d[2] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.d[2] >= 2*map.MapRadius){
-    return "```The sea is not that big matey!```"
+  if (args.d[2] >= 2 * map.MapRadius) {
+    return "```The sea is not that big matey!```";
   }
 }
 // p! rss r 4 d -12 25 -> {"r": [r], "d": [-12, 25]}
@@ -218,7 +215,7 @@ function parseArgs(args) {
   return dict;
 }
 
-function bestSpotCommand(message, args, f) {
+function bestSpotCommand(message, args, f, textData) {
   harvest = bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
@@ -237,6 +234,7 @@ function bestSpotCommand(message, args, f) {
         limit: Math.ceil(harvest.length / pageSize),
       },
       maxEntries: harvest.length,
+      textData: textData,
     },
     createBestSpotsMsg,
     message.channel
@@ -259,7 +257,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, rssAt);
+          bestSpotCommand(message, parsedArgs, rssAt, {title: "resource", stuff: "Fields, Planets and Moons"});
           break;
         case "labor":
           parsedArgs = parseArgs(args);
@@ -268,7 +266,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, laborAt);
+          bestSpotCommand(message, parsedArgs, laborAt, {title: "labor", stuff: "Fields, Planets and Moons"});
           break;
         case "planets":
           parsedArgs = parseArgs(args);
@@ -277,7 +275,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, planetsAt);
+          bestSpotCommand(message, parsedArgs, planetsAt, {title: "resource", stuff: "Planets and Moons"});
           break;
         case "fields":
           parsedArgs = parseArgs(args);
@@ -286,7 +284,7 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, fieldsAt);
+          bestSpotCommand(message, parsedArgs, fieldsAt, {title: "resource", stuff: "Fields"});
           break;
         case "dist":
           if (
@@ -389,17 +387,18 @@ function calculateShips(shipType, moonPts = 0) {
   let shipsPerHour = parseFloat(
     (
       60 /
-      (unitPlanner.ships[shipId].time * (unitPlanner.ships[shipId].maxReduction / 100))
+      (unitPlanner.ships[shipId].time *
+        (unitPlanner.ships[shipId].maxReduction / 100))
     ).toFixed(1)
-    
   );
-  if(unitPlanner.ships[shipId].moonReduction == true){
+  if (unitPlanner.ships[shipId].moonReduction == true) {
     shipsPerHour = parseFloat(
       (
         60 /
-        (unitPlanner.ships[shipId].time * (unitPlanner.ships[shipId].maxReduction - moonPts*5 / 100))
+        (unitPlanner.ships[shipId].time *
+          (unitPlanner.ships[shipId].maxReduction - (moonPts * 5) / 100))
       ).toFixed(1)
-    )
+    );
   }
   let rssPerHour = {
     crystal: shipsPerHour * unitPlanner.ships[shipId].crystal,
