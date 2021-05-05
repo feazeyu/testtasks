@@ -86,21 +86,14 @@ class Entry {
   }
   sendMsg() {
     let msg = this.createMsgFnc(this.data);
-    this.channel.send(msg).then(() =>
-      this.channel.messages.fetch({ limit: 1 }).then((messages) => {
-        let lastMessage = messages.first();
-        lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
-        this.id = lastMessage.id;
-        entryDict[this.id] = this;
-        console.log(this.id);
-      })
-    );
+    this.channel.send(msg).then((lastMessage) => {
+      lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
+      this.message = lastMessage;
+      entryDict[this.message.id] = this;
+    });
   }
   editMsg() {
-    let embed = this.createMsgFnc(this.data);
-    this.channel.messages.fetch(this.id).then((msg) => {
-      msg.edit(embed);
-    });
+    this.message.edit(this.createMsgFnc(this.data));
   }
   scrollForward() {
     this.data.pages.page++;
@@ -161,7 +154,9 @@ function createBestSpotsMsg(data) {
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
-      `Best ${data.textData.title} spots page ${data.pages.page + 1}/${data.pages.limit}:`
+      `Best ${data.textData.title} spots page ${data.pages.page + 1}/${
+        data.pages.limit
+      }:`
     )
     .setDescription(`${data.textData.stuff} for radius: ${data.radius}`)
     .addFields(spots);
@@ -257,7 +252,10 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, rssAt, {title: "resource", stuff: "Fields, Planets and Moons"});
+          bestSpotCommand(message, parsedArgs, rssAt, {
+            title: "resource",
+            stuff: "Fields, Planets and Moons",
+          });
           break;
         case "labor":
           parsedArgs = parseArgs(args);
@@ -266,7 +264,10 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, laborAt, {title: "labor", stuff: "Fields, Planets and Moons"});
+          bestSpotCommand(message, parsedArgs, laborAt, {
+            title: "labor",
+            stuff: "Fields, Planets and Moons",
+          });
           break;
         case "planets":
           parsedArgs = parseArgs(args);
@@ -275,7 +276,10 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, planetsAt, {title: "resource", stuff: "Planets and Moons"});
+          bestSpotCommand(message, parsedArgs, planetsAt, {
+            title: "resource",
+            stuff: "Planets and Moons",
+          });
           break;
         case "fields":
           parsedArgs = parseArgs(args);
@@ -284,7 +288,10 @@ client.on("message", (message) => {
             message.channel.send(err);
             break;
           }
-          bestSpotCommand(message, parsedArgs, fieldsAt, {title: "resource", stuff: "Fields"});
+          bestSpotCommand(message, parsedArgs, fieldsAt, {
+            title: "resource",
+            stuff: "Fields",
+          });
           break;
         case "dist":
           if (
