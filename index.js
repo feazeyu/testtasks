@@ -114,7 +114,7 @@ class Entry {
 client.on("messageReactionAdd", (reaction, user) => {
   let message = reaction.message,
     emoji = reaction.emoji;
-  if (user.bot) {
+  if (user.bot || !(message.id in entryDict)) {
     return 0;
   }
   if (emoji.name == "◀️") {
