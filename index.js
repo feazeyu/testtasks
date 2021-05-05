@@ -150,7 +150,7 @@ function createBestSpotsMsg(data) {
         data.harvest[x].dist,
     });
   }
-  
+
   //console.log(spots);
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
@@ -179,7 +179,7 @@ function createBestHsaMsg(data) {
         data.harvest[x].dist,
     });
   }
-  
+
   //console.log(spots);
   return new Discord.MessageEmbed()
     .setColor("#FF0000")
@@ -319,6 +319,18 @@ client.on("message", (message) => {
             break;
           }
           bestSpotCommand(message, parsedArgs, fieldsAt, {
+            title: "resource",
+            stuff: "Fields",
+          });
+          break;
+        case "hsa":
+          parsedArgs = parseArgs(args);
+          err = checkHsaArguments(parsedArgs);
+          if (err) {
+            message.channel.send(err);
+            break;
+          }
+          bestSpotCommand(message, parsedArgs, hsaAt, {
             title: "resource",
             stuff: "Fields",
           });
@@ -497,12 +509,12 @@ function bestTotalSpots(fnc, middle, radius, distance, entries) {
   return spots.slice(0, Math.min(entries, spots.length));
 }
 
-function hsaAt(coords){
+function hsaAt(coords) {
   let data = accessRdata(coords, 1);
   let reductionValue = {
     hsaRed: data["1"].hsaRed,
-    total: data["1"].hsaRed
-  }
+    total: data["1"].hsaRed,
+  };
   return reductionValue;
 }
 
@@ -572,14 +584,14 @@ function accessRdata(coords, radius) {
         MR: 0,
         GR: 0,
         CR: 0,
-        hsaRed: 0
+        hsaRed: 0,
       },
       2: {
         LQ: 0,
         MR: 0,
         GR: 0,
         CR: 0,
-        hsaRed: 0
+        hsaRed: 0,
       },
     };
   }
@@ -605,8 +617,8 @@ function precalcRdata(radius) {
   }
 }
 
-function redFromSize(size){
-  switch(size){
+function redFromSize(size) {
+  switch (size) {
     case "Small":
       return 1;
     case "Medium":
@@ -624,7 +636,7 @@ function rssWithinRadius(middle, radius, types) {
     MR: 0,
     GR: 0,
     CR: 0,
-    hsaRed: 0
+    hsaRed: 0,
   };
   //console.log("Cords with rad: " + hexMath.coordsWithinRadius(middle, radius));
   let coordsArray = hexMath.coordsWithinRadius(middle, radius);
@@ -635,7 +647,7 @@ function rssWithinRadius(middle, radius, types) {
       for (key in hex.HarvestValue) {
         HarvestValue[key] += parseInt(hex.HarvestValue[key]);
       }
-      if(hex.type == "3"){
+      if (hex.type == "3") {
         HarvestValue.hsaRed += redFromSize(hex.size);
       }
     }
