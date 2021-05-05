@@ -39,6 +39,9 @@ client.login(token);
 const prefix = "!p";
 const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
+function reqArgsOmmitedErr(command){
+  return "```" + `You forrgot some rrequirred arguments, type "!p help ${command}" forr help` + "```";
+}
 const needToSpecifyRadiusError =
   "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
 const wrongSyntaxErr =
@@ -169,6 +172,18 @@ function createBestHsaMsg(data) {
     )
     .setDescription(`${data.textData.stuff} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
     .addFields(spots);
+}
+
+function checkRtimeArguments(args){
+  if (!("f" in args) || args.f.length < 2) {
+    return reqArgsOmmitedErr("rtime");
+  }
+  if (!("t" in args) || args.t.length < 2) {
+    return reqArgsOmmitedErr("rtime");
+  }
+  if (!("s" in args) || args.s.length < 1) {
+    return reqArgsOmmitedErr("rtime");
+  }
 }
 
 function checkHsaArguments(args){
@@ -347,6 +362,14 @@ client.on("message", (message) => {
             title: "hsa",
             stuff: "Moons",
           }, createBestHsaMsg);
+          break;
+        case "rtime":
+          parsedArgs = parseArgs(args);
+          err = checkRtimeArguments(args);
+          if (err) {
+            message.channel.send(err);
+            break;
+          }
           break;
         case "dist":
           if (

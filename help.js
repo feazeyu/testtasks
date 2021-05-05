@@ -1,4 +1,4 @@
-const commands = ["help", "rss", "labor", "planets", "fields", "hsa"];
+const commands = ["help", "rss", "labor", "planets", "fields", "hsa", "rtime"];
 
 function help(command) {
   if (!commands.includes(command)) {
