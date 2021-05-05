@@ -150,6 +150,7 @@ function createBestSpotsMsg(data) {
         data.harvest[x].dist,
     });
   }
+  
   //console.log(spots);
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
@@ -159,6 +160,35 @@ function createBestSpotsMsg(data) {
       }:`
     )
     .setDescription(`${data.textData.stuff} for radius: ${data.radius}`)
+    .addFields(spots);
+}
+
+function createBestHsaMsg(data) {
+  let spots = [];
+  let begin = pageSize * data.pages.page;
+  let end = Math.min(pageSize * (data.pages.page + 1), data.maxEntries);
+  //console.log(begin);
+  //console.log(end);
+  for (x = begin; x < end; x++) {
+    spots.push({
+      name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
+      value:
+        " Moon Pts.: " +
+        data.reduction[x].total +
+        " | Distance: " +
+        data.harvest[x].dist,
+    });
+  }
+  
+  //console.log(spots);
+  return new Discord.MessageEmbed()
+    .setColor("#FF0000")
+    .setTitle(
+      `Best ${data.textData.title} spots page ${data.pages.page + 1}/${
+        data.pages.limit
+      }:`
+    )
+    .setDescription(`${data.textData.stuff}`)
     .addFields(spots);
 }
 
