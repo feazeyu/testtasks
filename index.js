@@ -12,6 +12,7 @@ const emoji = {
   crystal: "<:Crystal:757976643363930122>",
   metal: "<:Metal:757976643493953688>",
   gas: "<:Gas:757976643204546618>",
+  labor: "<:labor:839506095864676363>"
 };
 const exampleEmbed = new Discord.MessageEmbed()
   .setColor("#0099ff")
@@ -122,7 +123,8 @@ function createBestSpotsMsg(data) {
   for (x = begin; x < end; x++) {
     spots.push({
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
-      value:
+      value: `${emoji.metal} ${data.harvest[x].MR} - ${emoji.gas} ${data.harvest[x].GR} - ${emoji.crystal} ${data.harvest[x].CR} - ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`
+      /*value:
         data.harvest[x].MR +
         "<:Metal:757976643493953688> " +
         data.harvest[x].GR +
@@ -134,7 +136,7 @@ function createBestSpotsMsg(data) {
         " | Total: " +
         data.harvest[x].total +
         " | Distance: " +
-        data.harvest[x].dist,
+        data.harvest[x].dist,*/
     });
   }
 
