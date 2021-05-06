@@ -12,7 +12,7 @@ const emoji = {
   crystal: "<:Crystal:757976643363930122>",
   metal: "<:Metal:757976643493953688>",
   gas: "<:Gas:757976643204546618>",
-  labor: "<:labor:839506095864676363>"
+  labor: "<:labor:839506095864676363>",
 };
 const exampleEmbed = new Discord.MessageEmbed()
   .setColor("#0099ff")
@@ -123,7 +123,7 @@ function createBestSpotsMsg(data) {
   for (x = begin; x < end; x++) {
     spots.push({
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
-      value: `${emoji.metal} ${data.harvest[x].MR} - ${emoji.gas} ${data.harvest[x].GR} - ${emoji.crystal} ${data.harvest[x].CR} - ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`
+      value: `${emoji.metal} ${data.harvest[x].MR} | ${emoji.gas} ${data.harvest[x].GR} | ${emoji.crystal} ${data.harvest[x].CR} | ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`,
       /*value:
         data.harvest[x].MR +
         "<:Metal:757976643493953688> " +
@@ -215,12 +215,12 @@ function DHMSTimeString(time) {
   )}:${twoDigitFormat(time.mins)}:${twoDigitFormat(time.secs)}`;
 }
 
-function DHMSTimeEnumedString(time){
-  if(time.days != 0){
+function DHMSTimeEnumedString(time) {
+  if (time.days != 0) {
     return `${time.days} days ${time.hours} h ${time.mins} m ${time.secs} s`;
-  } else if (time.hours != 0){
+  } else if (time.hours != 0) {
     return `${time.hours} h ${time.mins} m ${time.secs} s`;
-  } else if (time.mins != 0){
+  } else if (time.mins != 0) {
     return `${time.mins} m ${time.secs} s`;
   } else {
     return `${time.secs} s`;
@@ -250,7 +250,7 @@ function calcRtime(args) {
   let returnTime = timeSecsToDHMS(returnTimeSeconds);
   let msg =
     "```" +
-`
+    `
 Fleets at movement
 from hex: ${origin.gotoCoords()}
 to hex: ${destination.gotoCoords()}
@@ -259,19 +259,22 @@ with impact time: ${DHMSTimeString(timeSecsToDHMS(impactTimeSeconds))}
 travel time: ${DHMSTimeEnumedString(travelTime)}
 will return ${DHMSTimeString(returnTime)}`;
 
-if("sg" in args && args.sg.length >= 1){
-  let travelTimeSecondsWithSGBug = Math.floor((distance * 3600) / (speed + args.sg[0]) + hexMath.eps);
-  let travelTimeWithSGBug = timeSecsToDHMS(travelTimeSecondsWithSGBug);
-  let returnTimeSecondsWithSGBug = impactTimeSeconds + travelTimeSecondsWithSGBug;
-  let returnTimeWithSGBug = timeSecsToDHMS(returnTimeSecondsWithSGBug);
-  msg += `
+  if ("sg" in args && args.sg.length >= 1) {
+    let travelTimeSecondsWithSGBug = Math.floor(
+      (distance * 3600) / (speed + args.sg[0]) + hexMath.eps
+    );
+    let travelTimeWithSGBug = timeSecsToDHMS(travelTimeSecondsWithSGBug);
+    let returnTimeSecondsWithSGBug =
+      impactTimeSeconds + travelTimeSecondsWithSGBug;
+    let returnTimeWithSGBug = timeSecsToDHMS(returnTimeSecondsWithSGBug);
+    msg += `
 
 If the movement is scheduled and SG bug active, the times are rather:  
 travel time: ${DHMSTimeEnumedString(travelTimeWithSGBug)}
 return ETA: ${DHMSTimeString(returnTimeWithSGBug)}`;
-}
+  }
 
-    msg += "```";
+  msg += "```";
   return msg;
 }
 
@@ -296,7 +299,7 @@ function checkRtimeArguments(args) {
   if (!("t" in args) || args.t.length < 3) {
     return reqArgsOmmitedErr("rtime");
   }
-  if ("sg" in args && args.sg.length >= 1 && args.sg[0] < 0){
+  if ("sg" in args && args.sg.length >= 1 && args.sg[0] < 0) {
     return "```Negative SG bug speed change?! Arr therr even moarr bugs there?!```";
   }
   if (
@@ -501,6 +504,24 @@ client.on("message", (message) => {
         {
           title: "resource",
           stuff: "Fields",
+        },
+        createBestSpotsMsg
+      );
+      break;
+    case "prospect":
+      parsedArgs = parseArgs(args);
+      err = checkArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.prospectAt,
+        {
+          title: "resource",
+          stuff: "Total Prospect MC rss generation",
         },
         createBestSpotsMsg
       );

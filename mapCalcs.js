@@ -81,6 +81,32 @@ function bestTotalSpots(fnc, middle, radius, distance, entries) {
   return spots.slice(0, Math.min(entries, spots.length));
 }
 
+function prospectAt(coords, radius){
+    return rssYieldAt(coords, radius, {
+        planets: {
+            labor: 0,
+            rss: 7,
+        },
+        fields: {
+            labor: 0,
+            rss: 2.5,
+        }
+    })
+}
+
+function rssYieldAt(coords, radius, yields){
+    let harvestPlanets = planetsAt(coords, radius);
+    let harvestFields = fieldsAt(coords, radius);
+    let yield = {
+        LQ: harvestFields.LQ * yields.fields.labor + harvestPlanets.LQ * yields.planets.labor,
+        MR: harvestFields.MR * yields.fields.rss + harvestPlanets.MR * yields.planets.rss,
+        GR: harvestFields.GR * yields.fields.rss + harvestPlanets.GR * yields.planets.rss,
+        CR: harvestFields.CR * yields.fields.rss + harvestPlanets.CR * yields.planets.rss,
+    }
+    yield.total = yield.MR + yield.GR + yield.CR;
+    return yield;
+}
+
 function hsaAt(coords) {
   let data = accessRdata(coords, 1);
   let reductionValue = {
@@ -234,5 +260,6 @@ exports.atFuncs = {
     rssAt: rssAt,
     fieldsAt: fieldsAt,
     planetsAt: planetsAt,
-    laborAt: laborAt
+    laborAt: laborAt,
+    prospectAt: prospectAt,
 };
