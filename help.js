@@ -126,7 +126,7 @@ function rtimeHelp() {
 This command is used to calculate return time (ETA) for fleets that are on a movement with known arrival time (ETA)
 This may be useful when one wants to snipe fleets on a movement
 
-Calculation don't take into account changes in speed caused by known Star Gate schedule speed bug!!!
+Calculation doesn't take into account changes in speed caused by known Star Gate schedule speed bug!!!
 
 required arguments are:
     s: speed
@@ -139,7 +139,7 @@ required arguments are:
         
     d: dest_x dest_y
     
-        [dest_x, dest_y] are coordinates of destionation of the movement
+        [dest_x, dest_y] are coordinates of destination of the movement
         
     t: hours mins secs
     
@@ -147,7 +147,11 @@ required arguments are:
         ETA 16:25:08 -> t 16 25 08
         
 optional arguments are:
-    none
+    
+    sg: speed_boost
+
+        speed_boost is a star gate speed bonus of the movement that is calculated an additional time as in the SG speed bug
+    
     
 `;
 
