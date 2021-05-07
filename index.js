@@ -1,3 +1,4 @@
+//TODO Parser should support floats sometimes
 const Discord = require("discord.js");
 const fs = require("fs");
 const hexMath = require("./hexMath");
@@ -11,6 +12,7 @@ const emoji = {
   crystal: "<:Crystal:757976643363930122>",
   metal: "<:Metal:757976643493953688>",
   gas: "<:Gas:757976643204546618>",
+  labor: "<:labor:839506095864676363>",
 };
 const exampleEmbed = new Discord.MessageEmbed()
   .setColor("#0099ff")
@@ -39,8 +41,12 @@ client.login(token);
 const prefix = "!p";
 const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
 const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
-function reqArgsOmmitedErr(command){
-  return "```" + `You forrgot some rrequirred arguments, type "!p help ${command}" forr help` + "```";
+function reqArgsOmmitedErr(command) {
+  return (
+    "```" +
+    `You forrgot some rrequirred arguments, type "!p help ${command}" forr help` +
+    "```"
+  );
 }
 const needToSpecifyRadiusError =
   "```You need to specify RRadius for this command! (add 'r 4' for radius 4)```";
@@ -57,7 +63,7 @@ function tooBigRadiusError(radius) {
 client.once("ready", () => {
   console.log("Ready!");
   channel = client.channels.cache.get("838491827400212513");
-  client.user.setActivity('!p help', { type: 'LISTENING' })
+  client.user.setActivity("!p help", { type: "LISTENING" });
 });
 var entryDict = {};
 class Entry {
@@ -117,7 +123,8 @@ function createBestSpotsMsg(data) {
   for (x = begin; x < end; x++) {
     spots.push({
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
-      value:
+      value: `${emoji.metal} ${data.harvest[x].MR} | ${emoji.gas} ${data.harvest[x].GR} | ${emoji.crystal} ${data.harvest[x].CR} | ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`,
+      /*value:
         data.harvest[x].MR +
         "<:Metal:757976643493953688> " +
         data.harvest[x].GR +
@@ -129,7 +136,7 @@ function createBestSpotsMsg(data) {
         " | Total: " +
         data.harvest[x].total +
         " | Distance: " +
-        data.harvest[x].dist,
+        data.harvest[x].dist,*/
     });
   }
 
@@ -141,7 +148,13 @@ function createBestSpotsMsg(data) {
         data.pages.limit
       }:`
     )
-    .setDescription(`${data.textData.stuff} \n\tfor radius: ${data.radius} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
+    .setDescription(
+      `${data.textData.stuff} \n\tfor radius: ${
+        data.radius
+      } \n\tfor distance up to ${
+        data.maxDistance
+      } from ${data.middle.gotoCoords()}`
+    )
     .addFields(spots);
 }
 
@@ -170,23 +183,138 @@ function createBestHsaMsg(data) {
         data.pages.limit
       }:`
     )
-    .setDescription(`${data.textData.stuff} \n\tfor distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}`)
+    .setDescription(
+      `${data.textData.stuff} \n\tfor distance up to ${
+        data.maxDistance
+      } from ${data.middle.gotoCoords()}`
+    )
     .addFields(spots);
 }
 
-function checkRtimeArguments(args){
-  if (!("f" in args) || args.f.length < 2) {
+function twoDigitFormat(num) {
+  if (num >= 10) {
+    return num.toString(10);
+  } else {
+    return "0" + num.toString(10);
+  }
+}
+
+function timeSecsToDHMS(timeSecs) {
+  let secs = timeSecs % 60;
+  let timeMins = Math.floor(timeSecs / 60 + hexMath.eps);
+  let mins = timeMins % 60;
+  let timeHours = Math.floor(timeMins / 60 + hexMath.eps);
+  let hours = timeHours % 60;
+  let days = Math.floor(timeHours / 24);
+  return { secs: secs, mins: mins, hours: hours, days: days };
+}
+
+function DHMSTimeString(time) {
+  return `${daysToWhenString(time.days)} at: ${twoDigitFormat(
+    time.hours
+  )}:${twoDigitFormat(time.mins)}:${twoDigitFormat(time.secs)}`;
+}
+
+function DHMSTimeEnumedString(time) {
+  if (time.days != 0) {
+    return `${time.days} days ${time.hours} h ${time.mins} m ${time.secs} s`;
+  } else if (time.hours != 0) {
+    return `${time.hours} h ${time.mins} m ${time.secs} s`;
+  } else if (time.mins != 0) {
+    return `${time.mins} m ${time.secs} s`;
+  } else {
+    return `${time.secs} s`;
+  }
+}
+
+function daysToWhenString(days) {
+  switch (days) {
+    case 0:
+      return "today";
+    case 1:
+      return "tomorrow";
+    default:
+      return `in ${days} days`;
+  }
+}
+
+function calcRtime(args) {
+  let origin = new hexMath.Coords(args.o[0], args.o[1]);
+  let destination = new hexMath.Coords(args.d[0], args.d[1]);
+  let speed = args.s[0];
+  let impactTimeSeconds = args.t[2] + 60 * args.t[1] + 3600 * args.t[0];
+  let distance = hexMath.distance(origin, destination);
+  let travelTimeSeconds = Math.floor((distance * 3600) / speed + hexMath.eps);
+  let travelTime = timeSecsToDHMS(travelTimeSeconds);
+  let returnTimeSeconds = impactTimeSeconds + travelTimeSeconds;
+  let returnTime = timeSecsToDHMS(returnTimeSeconds);
+  let msg =
+    "```" +
+    `
+Fleets at movement
+from hex: ${origin.gotoCoords()}
+to hex: ${destination.gotoCoords()}
+with speed: ${speed}
+with impact time: ${DHMSTimeString(timeSecsToDHMS(impactTimeSeconds))}
+travel time: ${DHMSTimeEnumedString(travelTime)}
+will return ${DHMSTimeString(returnTime)}`;
+
+  if ("sg" in args && args.sg.length >= 1) {
+    let travelTimeSecondsWithSGBug = Math.floor(
+      (distance * 3600) / (speed + args.sg[0]) + hexMath.eps
+    );
+    let travelTimeWithSGBug = timeSecsToDHMS(travelTimeSecondsWithSGBug);
+    let returnTimeSecondsWithSGBug =
+      impactTimeSeconds + travelTimeSecondsWithSGBug;
+    let returnTimeWithSGBug = timeSecsToDHMS(returnTimeSecondsWithSGBug);
+    msg += `
+
+If the movement is scheduled and SG bug active, the times are rather:  
+travel time: ${DHMSTimeEnumedString(travelTimeWithSGBug)}
+return ETA: ${DHMSTimeString(returnTimeWithSGBug)}`;
+  }
+
+  msg += "```";
+  return msg;
+}
+
+function checkRtimeArguments(args) {
+  console.log(args);
+  if (!("o" in args) || args.o.length < 2) {
     return reqArgsOmmitedErr("rtime");
   }
-  if (!("t" in args) || args.t.length < 2) {
+  if (!("d" in args) || args.d.length < 2) {
     return reqArgsOmmitedErr("rtime");
   }
   if (!("s" in args) || args.s.length < 1) {
     return reqArgsOmmitedErr("rtime");
   }
+  if (args.s[0] <= 0) {
+    return (
+      "```Those boats look rreally slow how would they manage to move with " +
+      args.s[0] +
+      " speed?! Did they get drunk and sail the wrong direction?!```"
+    );
+  }
+  if (!("t" in args) || args.t.length < 3) {
+    return reqArgsOmmitedErr("rtime");
+  }
+  if ("sg" in args && args.sg.length >= 1 && args.sg[0] < 0) {
+    return "```Negative SG bug speed change?! Arr therr even moarr bugs there?!```";
+  }
+  if (
+    args.t[2] < 0 ||
+    args.t[2] >= 60 ||
+    args.t[1] < 0 ||
+    args.t[1] >= 60 ||
+    args.t[0] < 0 ||
+    args.t[0] >= 24
+  ) {
+    return "```Wrrong time forrmat!```";
+  }
 }
 
-function checkHsaArguments(args){
+function checkHsaArguments(args) {
   if (!("e" in args) || args.e.length == 0) {
     // default size
     args.e = [50];
@@ -218,7 +346,7 @@ function checkArguments(args) {
     return needToSpecifyRadiusError;
   }
   if (args.r[0] > 10) {
-    return tooBigRadiusError(parseInt(args[4]));
+    return tooBigRadiusError(parseInt(args.r[0]));
   }
   if (args.r[0] <= 0) {
     return negativeIntegerErr;
@@ -290,132 +418,187 @@ client.on("message", (message) => {
   let args = message.content.split(" ");
   let err;
   let parsedArgs;
-  if (args[0] == prefix) {
-    //try {
-    if (args.length > 1) {
-      switch (args[1].toLowerCase()) {
-        case "help":
-          let helpMsg;
-          if(args[2]){
-            helpMsg = help.help(args[2]);
-          } else {
-            helpMsg = help.help("help")
-          }
-          message.channel.send("```" + helpMsg + "```");
-          break;
-        case "rss": //RSS command
-          parsedArgs = parseArgs(args);
-          err = checkArguments(parsedArgs);
-          if (err) {
-            message.channel.send(err);
-            break;
-          }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.rssAt, {
-            title: "resource",
-            stuff: "Fields, Planets and Moons",
-          }, createBestSpotsMsg);
-          break;
-        case "labor":
-          parsedArgs = parseArgs(args);
-          err = checkArguments(parsedArgs);
-          if (err) {
-            message.channel.send(err);
-            break;
-          }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.laborAt, {
-            title: "labor",
-            stuff: "Fields, Planets and Moons",
-          }, createBestSpotsMsg);
-          break;
-        case "planets":
-          parsedArgs = parseArgs(args);
-          err = checkArguments(parsedArgs);
-          if (err) {
-            message.channel.send(err);
-            break;
-          }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.planetsAt, {
-            title: "resource",
-            stuff: "Planets and Moons",
-          }, createBestSpotsMsg);
-          break;
-        case "fields":
-          parsedArgs = parseArgs(args);
-          err = checkArguments(parsedArgs);
-          if (err) {
-            message.channel.send(err);
-            break;
-          }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.fieldsAt, {
-            title: "resource",
-            stuff: "Fields",
-          }, createBestSpotsMsg);
-          break;
-        case "hsa":
-          parsedArgs = parseArgs(args);
-          err = checkHsaArguments(parsedArgs);
-          if (err) {
-            message.channel.send(err);
-            break;
-          }
-          bestSpotCommand(message, parsedArgs, mapCalcs.atFuncs.hsaAt, { 
-            title: "hsa",
-            stuff: "Moons",
-          }, createBestHsaMsg);
-          break;
-        case "rtime":
-          parsedArgs = parseArgs(args);
-          err = checkRtimeArguments(args);
-          if (err) {
-            message.channel.send(err);
-            break;
-          }
-          break;
-        case "dist":
-          if (
-            args[2] != undefined &&
-            args[3] != undefined &&
-            args[4] != undefined &&
-            args[5] != undefined
-          ) {
-            let A = {
-              Q: args[2],
-              R: args[3],
-            };
-            let B = {
-              Q: args[4],
-              R: args[5],
-            };
-            message.channel.send(hexMath.distance(A, B));
-          } else {
-            message.channel.send(wrongSyntaxErr);
-          }
-          break;
-          /*
+  if (args[0] != prefix) {
+    return;
+  }
+  //try {
+  if (args.length <= 1) {
+    message.channel.send(wrongSyntaxErr);
+    return;
+  }
+  switch (args[1].toLowerCase()) {
+    case "help":
+      let helpMsg;
+      if (args[2]) {
+        helpMsg = help.help(args[2]);
+      } else {
+        helpMsg = help.help("help");
+      }
+      message.channel.send("```" + helpMsg + "```");
+      break;
+    case "rss": //RSS command
+      parsedArgs = parseArgs(args);
+      err = checkArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.rssAt,
+        {
+          title: "resource",
+          stuff: "Fields, Planets and Moons",
+        },
+        createBestSpotsMsg
+      );
+      break;
+    case "labor":
+      parsedArgs = parseArgs(args);
+      err = checkArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.laborAt,
+        {
+          title: "labor",
+          stuff: "Fields, Planets and Moons",
+        },
+        createBestSpotsMsg
+      );
+      break;
+    case "planets":
+      parsedArgs = parseArgs(args);
+      err = checkArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.planetsAt,
+        {
+          title: "resource",
+          stuff: "Planets and Moons",
+        },
+        createBestSpotsMsg
+      );
+      break;
+    case "fields":
+      parsedArgs = parseArgs(args);
+      err = checkArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.fieldsAt,
+        {
+          title: "resource",
+          stuff: "Fields",
+        },
+        createBestSpotsMsg
+      );
+      break;
+    case "prospect":
+      parsedArgs = parseArgs(args);
+      err = checkArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.prospectAt,
+        {
+          title: "resource",
+          stuff: "Total Prospect MC rss generation",
+        },
+        createBestSpotsMsg
+      );
+      break;
+    case "hsa":
+      parsedArgs = parseArgs(args);
+      err = checkHsaArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestSpotCommand(
+        message,
+        parsedArgs,
+        mapCalcs.atFuncs.hsaAt,
+        {
+          title: "hsa",
+          stuff: "Moons",
+        },
+        createBestHsaMsg
+      );
+      break;
+    case "rtime":
+      parsedArgs = parseArgs(args);
+      err = checkRtimeArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      message.channel.send(calcRtime(parsedArgs));
+      break;
+    case "dist":
+      if (
+        args[2] != undefined &&
+        args[3] != undefined &&
+        args[4] != undefined &&
+        args[5] != undefined
+      ) {
+        let A = {
+          Q: args[2],
+          R: args[3],
+        };
+        let B = {
+          Q: args[4],
+          R: args[5],
+        };
+        message.channel.send(hexMath.distance(A, B));
+      } else {
+        message.channel.send(wrongSyntaxErr);
+      }
+      break;
+    /*
         case "yo":
           message.channel.send(exampleEmbed);
           break;*/
-        case "hex":
-          if (args[2] != undefined && args[3] != undefined) {
-            let hex = readHex(args[2], args[3]);
-            message.channel.send("Hex: " + hex.id);
-          } else {
-            message.channel.send(wrongSyntaxErr);
-          }
-          break;
-        case "ships":
-            parsedArgs = parseArgs(args);
-            checkShipArgs(parsedArgs);
-            message.channel.send(calculateShips(parsedArgs));
-          break;
-        default:
-          message.channel.send(wrongSyntaxErr);
-          break;
+    case "hex":
+      if (args[2] != undefined && args[3] != undefined) {
+        let hex = readHex(args[2], args[3]);
+        message.channel.send("Hex: " + hex.id);
+      } else {
+        message.channel.send(wrongSyntaxErr);
       }
-    } else {
+      break;
+    case "ships": //TODO Vice lodi, spravne delanou redukci pro light ships
+      if (args[2] != undefined && args[3] != undefined) {
+        message.channel.send(calculateShips(args[2], args[3]));
+      } else if (args[2] != undefined) {
+        message.channel.send(calculateShips(args[2]));
+      } else {
+        message.channel.send("```Gimme arrguments, landlubber!```");
+      }
+      break;
+    default:
       message.channel.send(wrongSyntaxErr);
-    }
+      break;
   }
+
   /*} catch (e) {
       message.channel.send(
         "```No joke, don't do that again. Please send this error to feazeyu#9566" +

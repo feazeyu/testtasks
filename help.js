@@ -24,7 +24,9 @@ function help(command) {
         "This command shows best spots by total Resources from Fields within selected radius"
       );
     case "hsa":
-      return hsahelp();
+      return hsaHelp();
+    case "rtime":
+      return rtimeHelp();
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
@@ -91,7 +93,7 @@ optional arguments are:
   return msg;
 }
 
-function hsahelp() {
+function hsaHelp() {
   let msg = `
 This command shows best spots by total HSA reduction from Moons whithin radius 1
 
@@ -114,6 +116,43 @@ optional arguments are:
         default values:
             e 50
 
+`;
+
+  return msg;
+}
+
+function rtimeHelp() {
+  let msg = `
+This command is used to calculate return time (ETA) for fleets that are on a movement with known arrival time (ETA)
+This may be useful when one wants to snipe fleets on a movement
+
+Calculation doesn't take into account changes in speed caused by known Star Gate schedule speed bug!!!
+
+required arguments are:
+    s: speed
+    
+        speed of a movement, this can be found in Movements (M) tab in-game
+        
+    o: origin_x origin_y
+    
+        [origin_x, origin_y] are coordinates of origin hex of the movement
+        
+    d: dest_x dest_y
+    
+        [dest_x, dest_y] are coordinates of destination of the movement
+        
+    t: hours mins secs
+    
+        impact time (ETA) in format hours:mins:secs, for example:
+        ETA 16:25:08 -> t 16 25 08
+        
+optional arguments are:
+    
+    sg: speed_boost
+
+        speed_boost is a star gate speed bonus of the movement that is calculated an additional time as in the SG speed bug
+    
+    
 `;
 
   return msg;

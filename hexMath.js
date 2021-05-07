@@ -100,3 +100,4 @@ exports.distance = distance;
 exports.Coords = Coords;
 exports.coordsWithinRadius = coordsWithinRadius;
 exports.runTests = runTests;
+exports.eps = eps;
