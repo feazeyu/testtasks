@@ -403,14 +403,10 @@ client.on("message", (message) => {
             message.channel.send(wrongSyntaxErr);
           }
           break;
-        case "ships": //TODO Vice lodi, spravne delanou redukci pro light ships
-          if (args[2] != undefined && args[3] != undefined) {
-            message.channel.send(calculateShips(args[2], args[3]));
-          } else if (args[2] != undefined) {
-            message.channel.send(calculateShips(args[2]));
-          } else {
-            message.channel.send("```Gimme arrguments, landlubber!```");
-          }
+        case "ships":
+            parsedArgs = parseArgs(args);
+            checkShipArgs(parsedArgs);
+            message.channel.send(calculateShips(parsedArgs));
           break;
         default:
           message.channel.send(wrongSyntaxErr);
@@ -428,42 +424,46 @@ client.on("message", (message) => {
       );
     }*/
 });
-
-function calculateShips(shipType, moonPts = 0) {
-  let shipId = NaN;
-  for (x = 0; x < unitPlanner.ships.length; x++) {
-    if (unitPlanner.ships[x].name == shipType.toLowerCase()) {
-      shipId = x;
-      console.log("Found a ship :>");
+function checkShipArgs(args){
+  if (!("m" in args) || args.m.length == 0) {
+    args.m = [0];
+  }
+}
+function calculateShips(args) {
+  let ship = NaN;
+  for(x = 0;x < unitPlanner.ships.length; x++){
+    if(unitPlanner.ships[x].name in args){
+      ship = unitPlanner.ships[x];
     }
   }
-  let shipsPerHour = parseFloat(
+  console.log((ship.time *(ship.maxReduction)));
+  let shipsPerHour = 
     (
       60 /
-      (unitPlanner.ships[shipId].time *
-        (unitPlanner.ships[shipId].maxReduction / 100))
+      (ship.time * (1-ship.maxReduction))
     ).toFixed(1)
-  );
-  if (unitPlanner.ships[shipId].moonReduction == true) {
-    shipsPerHour = parseFloat(
+  ;
+  if (ship.moonReduction == true) {
+    //console.log(typeof(args.m[0]));
+    shipsPerHour = 
       (
         60 /
-        (unitPlanner.ships[shipId].time *
-          (unitPlanner.ships[shipId].maxReduction - (moonPts * 5) / 100))
+        (ship.time *
+          (1-ship.maxReduction - (args.m[0] * 0.05)))
       ).toFixed(1)
-    );
+    ;
   }
   let rssPerHour = {
-    crystal: shipsPerHour * unitPlanner.ships[shipId].crystal,
-    gas: shipsPerHour * unitPlanner.ships[shipId].gas,
-    metal: shipsPerHour * unitPlanner.ships[shipId].metal,
+    crystal: shipsPerHour * ship.crystal,
+    gas: shipsPerHour * ship.gas,
+    metal: shipsPerHour * ship.metal,
   };
   let shipProduction = new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
-      "Ship production: " + shipsPerHour + " " + shipType + " per hour."
+      "Ship production: " + shipsPerHour + " " + ship.name + " per hour."
     )
-    .setDescription(unitPlanner.ships[shipId].note)
+    .setDescription(ship.note)
     .addFields(
       {
         name: "Metal usage",

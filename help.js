@@ -9,19 +9,19 @@ function help(command) {
       return baseHelp();
     case "rss":
       return rsshelp(
-        "This command shows best spots by total Resources from Fields, Planets and Moons whithin selected radius"
+        "This command shows best spots by total Resources from Fields, Planets and Moons within selected radius"
       );
     case "labor":
       return rsshelp(
-        "This command shows best spots by total Labor from Fields, Planets and Moons whithin selected radius"
+        "This command shows best spots by total Labor from Fields, Planets and Moons within selected radius"
       );
     case "planets":
       return rsshelp(
-        "This command shows best spots by total Resources from Planets and Moons whithin selected radius"
+        "This command shows best spots by total Resources from Planets and Moons within selected radius"
       );
     case "fields":
       return rsshelp(
-        "This command shows best spots by total Resources from Fields whithin selected radius"
+        "This command shows best spots by total Resources from Fields within selected radius"
       );
     case "hsa":
       return hsahelp();
