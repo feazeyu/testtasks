@@ -585,14 +585,11 @@ client.on("message", (message) => {
         message.channel.send(wrongSyntaxErr);
       }
       break;
-    case "ships": //TODO Vice lodi, spravne delanou redukci pro light ships
-      if (args[2] != undefined && args[3] != undefined) {
-        message.channel.send(calculateShips(args[2], args[3]));
-      } else if (args[2] != undefined) {
-        message.channel.send(calculateShips(args[2]));
-      } else {
-        message.channel.send("```Gimme arrguments, landlubber!```");
-      }
+    case "ships":
+      args = parseArgs(args);
+      checkShipArgs(args);
+      message.channel.send(calculateShips(args));
+
       break;
     default:
       message.channel.send(wrongSyntaxErr);
@@ -619,7 +616,7 @@ function calculateShips(args) {
       ship = unitPlanner.ships[x];
     }
   }
-  console.log((ship.time *(ship.maxReduction)));
+  //console.log((ship.time *(ship.maxReduction)));
   let shipsPerHour = 
     (
       60 /
