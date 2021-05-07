@@ -1,4 +1,13 @@
-const commands = ["help", "rss", "labor", "planets", "fields", "hsa", "rtime"];
+const commands = [
+  "help",
+  "rss",
+  "labor",
+  "planets",
+  "fields",
+  "hsa",
+  "rtime",
+  "prospect",
+];
 
 function help(command) {
   if (!commands.includes(command)) {
@@ -27,6 +36,10 @@ function help(command) {
       return hsaHelp();
     case "rtime":
       return rtimeHelp();
+    case "prospect":
+      return rsshelp(
+        "This command shows best spots by Total Resources from Prospect Inc. Mining Colony with Planet harvest 600% and Fields harvest 250%"
+      );
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
