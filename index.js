@@ -6,6 +6,7 @@ const mapCalcs = require("./mapCalcs");
 const help = require("./help.js");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
+const { exception } = require("console");
 const pageSize = 10;
 var channel;
 const emoji = {
@@ -106,10 +107,14 @@ client.on("messageReactionAdd", (reaction, user) => {
     return 0;
   }
   if (emoji.name == "◀️") {
-    reaction.users.remove(user.id);
+    reaction.users.remove(user.id).catch((error) => {
+      console.log(error);
+    });
     entryDict[message.id].scrollBackwards();
   } else if (emoji.name == "▶️") {
-    reaction.users.remove(user.id);
+    reaction.users.remove(user.id).catch((error) => {
+      console.log(error);
+    });
     entryDict[message.id].scrollForward();
   }
 });
@@ -421,6 +426,8 @@ client.on("message", (message) => {
   if (args[0] != prefix) {
     return;
   }
+  console.log("inc request");
+  console.log(args);
   //try {
   if (args.length <= 1) {
     message.channel.send(wrongSyntaxErr);
