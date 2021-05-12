@@ -373,22 +373,38 @@ function checkArguments(args) {
     return "```The sea is not that big matey!```";
   }
 }
-// p! rss r 4 d -12 25 -> {"r": [r], "d": [-12, 25]}
+// !p rss r 4 d -12 25 -> {"r": [r], "d": [-12, 25]}
 function parseArgs(args) {
   let i = 2;
-  let dict = { base: [] };
-  let current = "base";
+  let argDict = { base: [] };
+  let argKey = "base";
   while (i < args.length) {
+    let value = undefined;
     let num = parseInt(args[i]);
-    if (isNaN(num)) {
-      current = args[i];
-      dict[current] = [];
+    if (!isNaN(num)) {
+      value = num;
+    } else if (args[i][0] == '"') {
+      args[i] = args[i].slice(1);
+      value = "";
+      while (args[i][args[i].length - 1] != '"' && i < args.length) {
+        value += args[i] + " ";
+        i++;
+      }
+      if(i < args.length){
+        value += args[i].slice(0, -1);
+      }
     } else {
-      dict[current].push(num);
+      argKey = args[i];
+    }
+    if (value != undefined) {
+      if(!(argKey in argDict)){
+        argDict[argKey] = [];
+      }
+      argDict[argKey].push(value);
     }
     i++;
   }
-  return dict;
+  return argDict;
 }
 
 function bestSpotCommand(message, args, f, textData, msgGenFnc) {
@@ -617,34 +633,26 @@ client.on("message", (message) => {
       );
     }*/
 });
-function checkShipArgs(args){
+function checkShipArgs(args) {
   if (!("m" in args) || args.m.length == 0) {
     args.m = [0];
   }
 }
 function calculateShips(args) {
   let ship = NaN;
-  for(x = 0;x < unitPlanner.ships.length; x++){
-    if(unitPlanner.ships[x].name in args){
+  for (x = 0; x < unitPlanner.ships.length; x++) {
+    if (unitPlanner.ships[x].name in args) {
       ship = unitPlanner.ships[x];
     }
   }
   //console.log((ship.time *(ship.maxReduction)));
-  let shipsPerHour = 
-    (
-      60 /
-      (ship.time * (1-ship.maxReduction))
-    ).toFixed(1)
-  ;
+  let shipsPerHour = (60 / (ship.time * (1 - ship.maxReduction))).toFixed(1);
   if (ship.moonReduction == true) {
     //console.log(typeof(args.m[0]));
-    shipsPerHour = 
-      (
-        60 /
-        (ship.time *
-          (1-ship.maxReduction - (args.m[0] * 0.05)))
-      ).toFixed(1)
-    ;
+    shipsPerHour = (
+      60 /
+      (ship.time * (1 - ship.maxReduction - args.m[0] * 0.05))
+    ).toFixed(1);
   }
   let rssPerHour = {
     crystal: shipsPerHour * ship.crystal,
