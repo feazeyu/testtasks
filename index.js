@@ -1,6 +1,7 @@
 //TODO Parser should support floats sometimes
 const Discord = require("discord.js");
 const fs = require("fs");
+const alarm = require("./alarmr")
 const hexMath = require("./hexMath");
 const mapCalcs = require("./mapCalcs");
 const help = require("./help.js");
@@ -600,6 +601,11 @@ client.on("message", (message) => {
       break;
     default:
       message.channel.send(wrongSyntaxErr);
+      break;
+    case "alarm":
+      parsedArgs = parseArgs(args);
+      alarm.setAlarm(message.author, parsedArgs);
+      
       break;
   }
 
