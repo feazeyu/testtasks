@@ -210,7 +210,7 @@ function timeSecsToDHMS(timeSecs) {
   let timeMins = Math.floor(timeSecs / 60 + hexMath.eps);
   let mins = timeMins % 60;
   let timeHours = Math.floor(timeMins / 60 + hexMath.eps);
-  let hours = timeHours % 60;
+  let hours = timeHours % 24;
   let days = Math.floor(timeHours / 24);
   return { secs: secs, mins: mins, hours: hours, days: days };
 }
