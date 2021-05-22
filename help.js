@@ -7,6 +7,7 @@ const commands = [
   "hsa",
   "rtime",
   "prospect",
+  "ships",
 ];
 
 function help(command) {

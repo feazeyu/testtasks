@@ -396,10 +396,10 @@ function parseArgs(args) {
     } else {
       argKey = args[i];
     }
+    if(!(argKey in argDict)){
+      argDict[argKey] = [];
+    }
     if (value != undefined) {
-      if(!(argKey in argDict)){
-        argDict[argKey] = [];
-      }
       argDict[argKey].push(value);
     }
     i++;
@@ -639,13 +639,14 @@ function checkShipArgs(args) {
   }
 }
 function calculateShips(args) {
+  //console.log(args);
   let ship = NaN;
   for (x = 0; x < unitPlanner.ships.length; x++) {
     if (unitPlanner.ships[x].name in args) {
       ship = unitPlanner.ships[x];
     }
   }
-  //console.log((ship.time *(ship.maxReduction)));
+  //console.log(ship);
   let shipsPerHour = (60 / (ship.time * (1 - ship.maxReduction))).toFixed(1);
   if (ship.moonReduction == true) {
     //console.log(typeof(args.m[0]));
