@@ -8,6 +8,9 @@ class Coords {
   gotoCoords(){
     return "/goto " + this.Q + " " + this.R;
   }
+  equals(other){
+    return this.q == other.q && this.r == other.r;
+  }
 }
 
 function distance(A, B) {

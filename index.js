@@ -622,7 +622,11 @@ client.on("message", (message) => {
     case "alarm":
       parsedArgs = parseArgs(args);
       alarm.setAlarm(message.author, parsedArgs);
-      
+      break;
+    case "stn":
+      parsedArgs = parseArgs(args);
+      console.log(stationPlanner.calculateStn(parsedArgs));
+      console.log("completed");
       break;
   }
 
@@ -694,6 +698,4 @@ function calculateShips(args) {
     Math.floor(rssPerHour.crystal) +
     " crystals/h ```"*/
 }
-var testStation = new stationPlanner.Station(-96, 158);
-console.log(testStation.totalRSS);
 hexMath.runTests();
