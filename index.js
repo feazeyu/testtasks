@@ -7,6 +7,7 @@ const mapCalcs = require("./mapCalcs");
 const help = require("./help.js");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
+const stationPlanner = require("./stationPlanner");
 const { exception } = require("console");
 const pageSize = 10;
 var channel;
@@ -693,5 +694,6 @@ function calculateShips(args) {
     Math.floor(rssPerHour.crystal) +
     " crystals/h ```"*/
 }
-
+var testStation = new stationPlanner.Station(-96, 158);
+console.log(testStation.totalRSS);
 hexMath.runTests();

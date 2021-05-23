@@ -41,6 +41,10 @@ function help(command) {
       return rsshelp(
         "This command shows best spots by Total Resources from Prospect Inc. Mining Colony with Planet harvest 600% and Fields harvest 250%"
       );
+    case "ships":
+      return shipshelp(
+        "This command shows you how much ships will you make with a maxed out HSA and lvl.10 MIC offices near m moons."
+      )
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
@@ -171,5 +175,20 @@ optional arguments are:
 
   return msg;
 }
+function shipshelp(){
+  let msg = `
+    Usage: !p ships <shipname> [m <moonvalue>]
 
+    required arguments are:
+    shipname: 
+
+      Name of the ship you are making, just like it is ingame
+    
+    optional arguments are:
+
+      m: The amount of moon points your hsa has around it, Small moon=1, Normal moon=2 Large moon=3 etc.
+
+  `
+  return msg;
+}
 exports.help = help;
