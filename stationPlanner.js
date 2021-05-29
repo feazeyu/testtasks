@@ -22,7 +22,7 @@ const defaults = {
   HD: {
     radius: 2,
     harvestRate: 6.5,
-  }
+  },
 };
 
 function calculateOutpostProduction(outposts, options) {
@@ -48,9 +48,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.fieldsAt,
         options.coords,
-        options.MF.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        { radius: options.MF.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.MF.harvestRate;
@@ -63,9 +63,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.fieldsAt,
         options.coords,
-        options.TP.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        { radius: options.TP.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ = 0;
@@ -78,9 +78,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.planetsAt,
         options.coords,
-        options.MC.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        { radius: options.MC.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ = 0;
@@ -93,9 +93,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.laborAt,
         options.coords,
-        options.MC.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        {radius: options.HD.radius}
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.HD.harvestRate;
@@ -124,10 +124,10 @@ function calculateOutpostProduction(outposts, options) {
           CR: possibilities[i].harvest.CR,
           hsaRed: possibilities[i].harvest.hsaRed,
         },
-        coords: {...possibilities[i].coords},
+        coords: { ...possibilities[i].coords },
       };
-      for(key in newPossibility.harvest){
-        if(key in harvests[j]){
+      for (key in newPossibility.harvest) {
+        if (key in harvests[j]) {
           newPossibility.harvest[key] += harvests[j][key];
         }
       }
@@ -142,14 +142,14 @@ function comparatorTotal(a, b) {
   return b.harvest.total - a.harvest.total;
 }
 
-function stnAt(args){
+function stnAt(args) {
   possibilities = calculateStn(args);
   return possibilities[0].harvest;
 }
 
 function calculateStn(args) {
   let outposts = args.o;
-  let entries = 5; 
+  let entries = 15;
   let options = {
     station: defaults.station,
     MF: defaults.MF,
@@ -157,7 +157,7 @@ function calculateStn(args) {
     MC: defaults.MC,
     coords: new hexMath.Coords(args.h[0], args.h[1]),
   };
-  let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station.radius);
+  let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
   for (key in stationHarvest) {
     stationHarvest[key] *= options.station.harvestRate;
   }
@@ -188,7 +188,6 @@ function calculateStn(args) {
     Math.min(entries, possibleProductions.length)
   );
 }
-
 
 exports.calculateStn = calculateStn;
 exports.stnAt = stnAt;
