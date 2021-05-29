@@ -427,7 +427,7 @@ function stnCommand(message, args, textData) {
   new_entry.sendMsg();
 }
 
-function bestStnCommand(message, args) {
+function bestStnCommand(message, args, textData) {
   harvest = mapCalcs.bestTotalSpots(
     stationPlanner.stnAt,
     new hexMath.Coords(args.d[0], args.d[1]),
@@ -448,7 +448,7 @@ function bestStnCommand(message, args) {
       maxEntries: harvest.length,
       textData: textData,
     },
-    msgGenFnc,
+    createBestSpotsMsg,
     message.channel
   );
   new_entry.sendMsg();
