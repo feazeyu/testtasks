@@ -157,6 +157,30 @@ function calculateStn(args) {
     MC: defaults.MC,
     coords: new hexMath.Coords(args.h[0], args.h[1]),
   };
+  if(args.MF){
+  if(args.MF[0]){
+    options.MF.radius = args.MF[0] 
+    if(args.MF[1]){
+      options.MF.harvestRate = args.MF[1]/100
+    }
+  }
+}
+  if(args.TP){
+  if(args.TP[0]){
+    options.TP.radius = args.TP[0] 
+    if(args.TP[1]){
+      options.TP.harvestRate = args.TP[1]/100
+    }
+  }
+}
+  if(args.MC){
+  if(args.MC[0]){
+    options.MC.radius = args.MC[0] 
+    if(args.MC[1]){
+      options.MC.harvestRate = args.MC[1]/100
+    }
+  }
+}
   let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
   for (key in stationHarvest) {
     stationHarvest[key] *= options.station.harvestRate;
