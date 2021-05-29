@@ -1,7 +1,7 @@
 //TODO Parser should support floats sometimes
 const Discord = require("discord.js");
 const fs = require("fs");
-const alarm = require("./alarmr")
+const alarm = require("./alarmr");
 const hexMath = require("./hexMath");
 const mapCalcs = require("./mapCalcs");
 const help = require("./help.js");
@@ -9,7 +9,7 @@ const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
 const stationPlanner = require("./stationPlanner");
 const { exception } = require("console");
-const pageSize = 10;
+const pageSize = { rss: 10, stn: 5 };
 var channel;
 const emoji = {
   crystal: "<:Crystal:757976643363930122>",
@@ -123,8 +123,8 @@ client.on("messageReactionAdd", (reaction, user) => {
 
 function createBestSpotsMsg(data) {
   let spots = [];
-  let begin = pageSize * data.pages.page;
-  let end = Math.min(pageSize * (data.pages.page + 1), data.maxEntries);
+  let begin = pageSize.rss * data.pages.page;
+  let end = Math.min(pageSize.rss * (data.pages.page + 1), data.maxEntries);
   //console.log(begin);
   //console.log(end);
   for (x = begin; x < end; x++) {
@@ -167,8 +167,8 @@ function createBestSpotsMsg(data) {
 
 function createBestHsaMsg(data) {
   let spots = [];
-  let begin = pageSize * data.pages.page;
-  let end = Math.min(pageSize * (data.pages.page + 1), data.maxEntries);
+  let begin = pageSize.rss * data.pages.page;
+  let end = Math.min(pageSize.rss * (data.pages.page + 1), data.maxEntries);
   //console.log(begin);
   //console.log(end);
   for (x = begin; x < end; x++) {
@@ -391,13 +391,13 @@ function parseArgs(args) {
         value += args[i] + " ";
         i++;
       }
-      if(i < args.length){
+      if (i < args.length) {
         value += args[i].slice(0, -1);
       }
     } else {
       argKey = args[i];
     }
-    if(!(argKey in argDict)){
+    if (!(argKey in argDict)) {
       argDict[argKey] = [];
     }
     if (value != undefined) {
@@ -408,13 +408,59 @@ function parseArgs(args) {
   return argDict;
 }
 
+function stnCommand(message, args, textData) {
+  let possibilities = stationPlanner.calculateStn(args);
+  new_entry = new Entry(
+    {
+      possibilities: possibilities,
+      middle: new hexMath.Coords(args.h[0], args.h[1]),
+      pages: {
+        page: 0,
+        limit: Math.ceil(possibilities.length / pageSize.stn),
+      },
+      maxEntries: possibilities.length,
+      textData: textData,
+    },
+    createStationMessage,
+    message.channel
+  );
+  new_entry.sendMsg();
+}
+
+function bestStnCommand(message, args, textData) {
+  harvest = mapCalcs.bestTotalSpots(
+    stationPlanner.stnAt,
+    new hexMath.Coords(args.d[0], args.d[1]),
+    args.d[2],
+    args.e[0],
+    args
+  );
+  new_entry = new Entry(
+    {
+      harvest: harvest,
+      radius: args.r[0],
+      middle: new hexMath.Coords(args.d[0], args.d[1]),
+      maxDistance: args.d[2],
+      pages: {
+        page: 0,
+        limit: Math.ceil(harvest.length / pageSize.stn),
+      },
+      maxEntries: harvest.length,
+      textData: textData,
+    },
+    createBestSpotsMsg,
+    message.channel
+  );
+  new_entry.sendMsg();
+}
+
 function bestSpotCommand(message, args, f, textData, msgGenFnc) {
   harvest = mapCalcs.bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
-    args.r[0],
     args.d[2],
-    args.e[0]
+    args.e[0],
+    { radius: args.r[0] }
   );
   //TODO Osetrit crashe pri nezadani argumentu
 
@@ -426,7 +472,7 @@ function bestSpotCommand(message, args, f, textData, msgGenFnc) {
       maxDistance: args.d[2],
       pages: {
         page: 0,
-        limit: Math.ceil(harvest.length / pageSize),
+        limit: Math.ceil(harvest.length / pageSize.rss),
       },
       maxEntries: harvest.length,
       textData: textData,
@@ -625,8 +671,7 @@ client.on("message", (message) => {
       break;
     case "stn":
       parsedArgs = parseArgs(args);
-      let msgData = stationPlanner.calculateStn(parsedArgs)
-      message.channel.send(createStationMessage(msgData));
+      stnCommand(message, parsedArgs, {stuff: "rss"});
       console.log("completed");
       break;
   }
@@ -639,18 +684,27 @@ client.on("message", (message) => {
       );
     }*/
 });
-function createStationMessage(data){
+function createStationMessage(data) {
   let spots = [];
-  let begin = 0;//pageSize * data.pages.page;
-  let end = 5;//Math.min(pageSize * (data.pages.page + 1), data.maxEntries);
-  for (x = begin; x < end; x++) { 
+  let begin = pageSize.stn * data.pages.page;
+  let end = Math.min(pageSize.stn * (data.pages.page + 1), data.maxEntries);
+  for (x = begin; x < end; x++) {
     spots.push({
       name: x + 1 + ". ",
-      value: `${emoji.metal} ${Math.round(data[x].harvest.MR)} | ${emoji.gas} ${Math.round(data[x].harvest.GR)} | ${emoji.crystal} ${Math.round(data[x].harvest.CR)} | ${emoji.labor} ${Math.round(data[x].harvest.LQ)} | Total: ${Math.round(data[x].harvest.total)}
+      value: `${emoji.metal} ${Math.round(
+        data.possibilities[x].harvest.MR
+      )} | ${emoji.gas} ${Math.round(data.possibilities[x].harvest.GR)} | ${
+        emoji.crystal
+      } ${Math.round(data.possibilities[x].harvest.CR)} | ${
+        emoji.labor
+      } ${Math.round(data.possibilities[x].harvest.LQ)} | Total: ${Math.round(
+        data.possibilities[x].harvest.total
+      )}
       Outpost coords: \n`,
     });
-    for (key in data[x].coords){
-    spots[spots.length - 1].value += key + ": " + data[x].coords[key] + "\n";
+    for (key in data.possibilities[x].coords) {
+      spots[spots.length - 1].value +=
+        key + ": " + data.possibilities[x].coords[key] + "\n";
     }
   }
 
@@ -658,7 +712,12 @@ function createStationMessage(data){
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
-      `Best spots for outposts lmao:`
+      `Best outpost spots page ${data.pages.page + 1}/${
+        data.pages.limit
+      }:`
+    )
+    .setDescription(
+      `sorted by ${data.textData.stuff} \n\t for stn at ${data.middle.gotoCoords()}`
     )
     .addFields(spots);
 }

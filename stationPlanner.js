@@ -22,7 +22,7 @@ const defaults = {
   HD: {
     radius: 2,
     harvestRate: 6.5,
-  }
+  },
 };
 
 function calculateOutpostProduction(outposts, options) {
@@ -48,9 +48,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.fieldsAt,
         options.coords,
-        options.MF.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        { radius: options.MF.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.MF.harvestRate;
@@ -63,9 +63,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.fieldsAt,
         options.coords,
-        options.TP.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        { radius: options.TP.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ = 0;
@@ -78,9 +78,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.planetsAt,
         options.coords,
-        options.MC.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        { radius: options.MC.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ = 0;
@@ -93,9 +93,9 @@ function calculateOutpostProduction(outposts, options) {
       harvests = mapCalcs.bestTotalSpots(
         mapCalcs.atFuncs.laborAt,
         options.coords,
-        options.MC.radius,
         options.station.radius,
-        topSpotCount
+        topSpotCount,
+        {radius: options.HD.radius}
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.HD.harvestRate;
@@ -124,10 +124,10 @@ function calculateOutpostProduction(outposts, options) {
           CR: possibilities[i].harvest.CR,
           hsaRed: possibilities[i].harvest.hsaRed,
         },
-        coords: {...possibilities[i].coords},
+        coords: { ...possibilities[i].coords },
       };
-      for(key in newPossibility.harvest){
-        if(key in harvests[j]){
+      for (key in newPossibility.harvest) {
+        if (key in harvests[j]) {
           newPossibility.harvest[key] += harvests[j][key];
         }
       }
@@ -142,9 +142,14 @@ function comparatorTotal(a, b) {
   return b.harvest.total - a.harvest.total;
 }
 
+function stnAt(args) {
+  possibilities = calculateStn(args);
+  return possibilities[0].harvest;
+}
+
 function calculateStn(args) {
   let outposts = args.o;
-  let entries = 5; 
+  let entries = 15;
   let options = {
     station: defaults.station,
     MF: defaults.MF,
@@ -176,7 +181,7 @@ function calculateStn(args) {
     }
   }
 }
-  let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station.radius);
+  let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
   for (key in stationHarvest) {
     stationHarvest[key] *= options.station.harvestRate;
   }
@@ -208,46 +213,5 @@ function calculateStn(args) {
   );
 }
 
-
-//DO NOT USE
-class Station {
-  constructor(q, r) {
-    this.q = q;
-    this.r = r;
-    this.template = ["MF", "MF", "TP", "HSA"];
-    this.MPL = false; //Is mars prosper league?
-    this.FL = false; //Is frontier legion?
-    this.NH = false; //Can it have new horizons?
-    this.MFRadius = 3;
-    this.MFEfficiency = 4;
-    this.TPRadius = 1;
-    this.TPEfficiency = 4;
-    this.stationHarvest = 1.43;
-    this.radius = 4;
-    this.multiplier = 1.15;
-    this.occupiedSpots = [];
-    this.totalRSS = {
-      LQ: 0,
-      MR: 700,
-      GR: 700,
-      CR: 700,
-    };
-    this.parseTemplate();
-    this.calculateProduction();
-  }
-
-  options() {
-    if (this.FL) {
-      this.stationHarvest += 0.4;
-    }
-    if (this.NH) {
-      this.radius++;
-    }
-    if (this.MPL) {
-      this.TPRadius++;
-      this.TPBase = 3.25;
-      this.multiplier *= 1.15;
-    }
-  }
-}
 exports.calculateStn = calculateStn;
+exports.stnAt = stnAt;
