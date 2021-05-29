@@ -626,7 +626,7 @@ client.on("message", (message) => {
     case "stn":
       parsedArgs = parseArgs(args);
       let msgData = stationPlanner.calculateStn(parsedArgs)
-      console.log(msgData);
+      message.channel.send(createStationMessage(msgData));
       console.log("completed");
       break;
   }
@@ -639,6 +639,29 @@ client.on("message", (message) => {
       );
     }*/
 });
+function createStationMessage(data){
+  let spots = [];
+  let begin = 0;//pageSize * data.pages.page;
+  let end = 5;//Math.min(pageSize * (data.pages.page + 1), data.maxEntries);
+  for (x = begin; x < end; x++) { 
+    spots.push({
+      name: x + 1 + ". ",
+      value: `${emoji.metal} ${Math.round(data[x].harvest.MR)} | ${emoji.gas} ${Math.round(data[x].harvest.GR)} | ${emoji.crystal} ${Math.round(data[x].harvest.CR)} | ${emoji.labor} ${Math.round(data[x].harvest.LQ)} | Total: ${Math.round(data[x].harvest.total)}
+      Outpost coords: \n`,
+    });
+    for (key in data[x].coords){
+    spots[spots.length - 1].value += key + ": " + data[x].coords[key] + "\n";
+    }
+  }
+
+  //console.log(spots);
+  return new Discord.MessageEmbed()
+    .setColor("#0099ff")
+    .setTitle(
+      `Best spots for outposts lmao:`
+    )
+    .addFields(spots);
+}
 function checkShipArgs(args) {
   if (!("m" in args) || args.m.length == 0) {
     args.m = [0];
