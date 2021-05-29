@@ -404,6 +404,9 @@ function checkStnsArguments(args) {
       return "```" + args.outposts[i] + "is not a valid outpost!```";
     }
   }
+  if(args.outposts.length > 5){
+    return "```You won't fit that many outposts, or will ya?!```";
+  }
   if(!args.sort || !args.sort[0]){
     args.sort = ["rss"];
   }
@@ -420,6 +423,9 @@ function checkStnArguments(args){
     if(!(args.outposts[i] in validOutposts)){
       return "```" + args.outposts[i] + "is not a valid outpost!```";
     }
+  }
+  if(args.outposts.length > 5){
+    return "```You won't fit that many outposts, or will ya?!```";
   }
   if(!args.sort || !args.sort[0]){
     args.sort = ["rss"];
