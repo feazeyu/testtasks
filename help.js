@@ -221,6 +221,8 @@ function stnsHelp(){
    
     e <entries>: Amount of entries to display.
    
+    station <radius>: changes the station radius
+
     orgs <"Org"> <"Org"> <"Org">: Not yet implemented.
    
     f <"Faction">: Not yet implemented.
