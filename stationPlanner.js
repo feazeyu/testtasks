@@ -95,7 +95,7 @@ function calculateOutpostProduction(outposts, options) {
         options.coords,
         options.station.radius,
         topSpotCount,
-        {radius: options.HD.radius}
+        { radius: options.HD.radius }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.HD.harvestRate;
@@ -147,40 +147,46 @@ function stnAt(args) {
   return possibilities[0].harvest;
 }
 
+function loadOptions(args){
+  let options = {
+  station: {...defaults.station},
+    MF: {...defaults.MF},
+    TP: {...defaults.TP},
+    MC: {...defaults.MC},
+    HD: {...defaults.HD},
+    coords: new hexMath.Coords(args.h[0], args.h[1]),
+  };
+  if (args.MF) {
+    if (args.MF[0]) {
+      options.MF.radius = args.MF[0];
+      if (args.MF[1]) {
+        options.MF.harvestRate = args.MF[1] / 100;
+      }
+    }
+  }
+  if (args.TP) {
+    if (args.TP[0]) {
+      options.TP.radius = args.TP[0];
+      if (args.TP[1]) {
+        options.TP.harvestRate = args.TP[1] / 100;
+      }
+    }
+  }
+  if (args.MC) {
+    if (args.MC[0]) {
+      options.MC.radius = args.MC[0];
+      if (args.MC[1]) {
+        options.MC.harvestRate = args.MC[1] / 100;
+      }
+    }
+  }
+  return options;
+}
+
 function calculateStn(args) {
   let outposts = args.o;
   let entries = 15;
-  let options = {
-    station: defaults.station,
-    MF: defaults.MF,
-    TP: defaults.TP,
-    MC: defaults.MC,
-    coords: new hexMath.Coords(args.h[0], args.h[1]),
-  };
-  if(args.MF){
-  if(args.MF[0]){
-    options.MF.radius = args.MF[0] 
-    if(args.MF[1]){
-      options.MF.harvestRate = args.MF[1]/100
-    }
-  }
-}
-  if(args.TP){
-  if(args.TP[0]){
-    options.TP.radius = args.TP[0] 
-    if(args.TP[1]){
-      options.TP.harvestRate = args.TP[1]/100
-    }
-  }
-}
-  if(args.MC){
-  if(args.MC[0]){
-    options.MC.radius = args.MC[0] 
-    if(args.MC[1]){
-      options.MC.harvestRate = args.MC[1]/100
-    }
-  }
-}
+  let options = loadOptions(args);
   let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
   for (key in stationHarvest) {
     stationHarvest[key] *= options.station.harvestRate;
