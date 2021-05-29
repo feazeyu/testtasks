@@ -625,7 +625,8 @@ client.on("message", (message) => {
       break;
     case "stn":
       parsedArgs = parseArgs(args);
-      console.log(stationPlanner.calculateStn(parsedArgs));
+      let msgData = stationPlanner.calculateStn(parsedArgs)
+      console.log(msgData);
       console.log("completed");
       break;
   }

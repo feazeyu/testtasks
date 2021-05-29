@@ -85,7 +85,7 @@ function prospectAt(coords, radius){
     return rssYieldAt(coords, radius, {
         planets: {
             labor: 0,
-            rss: 7,
+            rss: 7.59, //7.59 because 6.9 is base, * 1.10 for apex mining lasers, ikr. Weird
         },
         fields: {
             labor: 0,

@@ -15,6 +15,14 @@ const defaults = {
     radius: 1,
     harvestRate: 4.0,
   },
+  MC: {
+    radius: 2,
+    harvestRate: 6.9,
+  },
+  HD: {
+    radius: 2,
+    harvestRate: 6.5,
+  }
 };
 
 function calculateOutpostProduction(outposts, options) {
@@ -67,8 +75,34 @@ function calculateOutpostProduction(outposts, options) {
       }
       break;
     case "MC":
+      harvests = mapCalcs.bestTotalSpots(
+        mapCalcs.atFuncs.planetsAt,
+        options.coords,
+        options.MC.radius,
+        options.station.radius,
+        topSpotCount
+      );
+      for (let i = 0; i < topSpotCount; i++) {
+        harvests[i].LQ = 0;
+        harvests[i].MR *= options.MC.harvestRate;
+        harvests[i].GR *= options.MC.harvestRate;
+        harvests[i].CR *= options.MC.harvestRate;
+      }
       break;
     case "HD":
+      harvests = mapCalcs.bestTotalSpots(
+        mapCalcs.atFuncs.laborAt,
+        options.coords,
+        options.MC.radius,
+        options.station.radius,
+        topSpotCount
+      );
+      for (let i = 0; i < topSpotCount; i++) {
+        harvests[i].LQ *= options.HD.harvestRate;
+        harvests[i].MR = 0;
+        harvests[i].GR = 0;
+        harvests[i].CR = 0;
+      }
       break;
     case "HSA":
       break;
@@ -115,6 +149,7 @@ function calculateStn(args) {
     station: defaults.station,
     MF: defaults.MF,
     TP: defaults.TP,
+    MC: defaults.MC,
     coords: new hexMath.Coords(args.h[0], args.h[1]),
   };
   let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station.radius);
@@ -149,6 +184,8 @@ function calculateStn(args) {
   );
 }
 
+
+//DO NOT USE
 class Station {
   constructor(q, r) {
     this.q = q;

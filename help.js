@@ -106,6 +106,7 @@ optional arguments are:
         default values:
             e 50
 
+example command: !p 
 `;
 
   return msg;
