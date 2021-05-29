@@ -25,7 +25,7 @@ class Hex {
   }
 }
 
-loadMap("./resources/map.json");
+loadMap("./resources/JsonMapThunderdome.json");
 function loadMap(path) {
   let data = "";
   map = JSON.parse(fs.readFileSync(path));
