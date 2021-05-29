@@ -8,6 +8,8 @@ const commands = [
   "rtime",
   "prospect",
   "ships",
+  "stns",
+  "stn"
 ];
 
 function help(command) {
@@ -45,6 +47,10 @@ function help(command) {
       return shipshelp(
         "This command shows you how much ships will you make with a maxed out HSA and lvl.10 MIC offices near m moons."
       )
+    case "stn" :
+      return stnHelp();
+    case "stns":
+      return stnsHelp();
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
@@ -189,6 +195,63 @@ function shipshelp(){
 
       m: The amount of moon points your hsa has around it, Small moon=1, Normal moon=2 Large moon=3 etc.
 
+  `
+  return msg;
+}
+
+function stnsHelp(){
+ let msg = `
+  This command will return a list of the best station spots resource wise, with specifed outposts.
+  This is one hell of a command, so brace for a loooong one.
+
+  Required args: 
+      none, but it won't do much without any.
+  
+  Optional args:
+    
+  outposts <"Outpost"> <"Outpost"> <"Outpost">...: write the shorthand of an outpost after this in "" to add it to the station. For example, !p stns outposts "MF" "TP" would look for a station with a MF and a TP.
+    
+    m <number>: If you included "HSA" in your outposts, only stations with a hsa of <number> or more moon points will be shown. For example: !p stns outposts "MF" "HSA" m 6 would show the best resource spots for stations that have access to a 6% HSA
+   
+    MF, TP, MC, HD <radius> <harvestRate>: If you want different outposts than the default ones, add <OutpostName> <Radius> <HarvestRate>. For example: !p stns outposts "MF" "MF" "TP" MF 3 400 TP 2 325 would look for a station with 2 MF's that have 3 range each, 400% harvest rate and a TP with radius 2 and Harvest rate of 325%
+   
+    sort <"type">: Sort the results in different ways, currently supports only "rss" and "labor". For example: !p stns outposts "MF" "HD" HD 4 sort "labor" would look for a habdome, radius 4, MF radius 1 and would sort by labor.
+   
+    d <x> <y> <maxRadius>: Specify which hex to look from and how far. For example: !p stns d 0 0 5 outposts "MF" "TP" would look for a station to place up to 5 hexes away from 0 0, outposts can be outside this radius.
+   
+    e <entries>: Amount of entries to display.
+   
+    orgs <"Org"> <"Org"> <"Org">: Not yet implemented.
+   
+    f <"Faction">: Not yet implemented.
+  
+  Default Values:
+    
+  MF: Radius 1 Harvest 450
+  
+    TP: Radius 1 Harvest 400
+  
+    MC: Radius 2 Harvest 690
+  
+    HD: Radius 2 Harvest 700
+  
+    e: 50 entries
+  
+    d: 0 0 whole map
+
+  Example of a command I'd use to make a Workshed station: !p stns outposts "MF" "MF" "TP" "HSA" MF 3 400 TP 2 325 m 6
+    `
+ return msg;
+}
+
+function stnHelp(){
+  let msg = `
+  This command will look at all the ways how to put outpost down with a station on a specified hex, then outpust them sorted, with outpost locations.
+  The args are same as for !p stns, with an exception.
+  d <x> <y> <maxDist> is replaced by h <x> <y>
+  h <x> <y> is required.
+
+  Example command: !p stn h 14 23 outposts "MF" "MF" "TP" "HSA" MF 3 400 TP 2 325 m 0 sort "rss" 
   `
   return msg;
 }
