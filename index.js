@@ -121,6 +121,32 @@ client.on("messageReactionAdd", (reaction, user) => {
   }
 });
 
+function createBestStnMsg(data) {
+  let spots = [];
+  let begin = pageSize.rss * data.pages.page;
+  let end = Math.min(pageSize.rss * (data.pages.page + 1), data.maxEntries);
+  for (x = begin; x < end; x++) {
+    spots.push({
+      name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
+      value: `${emoji.metal} ${data.harvest[x].MR} | ${emoji.gas} ${data.harvest[x].GR} | ${emoji.crystal} ${data.harvest[x].CR} | ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`,
+    });
+  }
+
+  return new Discord.MessageEmbed()
+    .setColor("#0099ff")
+    .setTitle(
+      `Best stations spots page ${data.pages.page + 1}/${
+        data.pages.limit
+      }:`
+    )
+    .setDescription(
+      `Sorted by ${data.textData.stuff} \n\tfor distance up to ${
+        data.maxDistance
+      } from ${data.middle.gotoCoords()}`
+    )
+    .addFields(spots);
+}
+
 function createBestSpotsMsg(data) {
   let spots = [];
   let begin = pageSize.rss * data.pages.page;
@@ -147,7 +173,6 @@ function createBestSpotsMsg(data) {
     });
   }
 
-  //console.log(spots);
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
@@ -448,7 +473,7 @@ function bestStnCommand(message, args, textData) {
       maxEntries: harvest.length,
       textData: textData,
     },
-    createBestSpotsMsg,
+    createBestStnMsg,
     message.channel
   );
   new_entry.sendMsg();
