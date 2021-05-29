@@ -105,8 +105,14 @@ function calculateOutpostProduction(outposts, options) {
       }
       break;
     case "HSA":
-      break;
     case "CSA":
+      harvests = mapCalcs.bestTotalSpots(
+        mapCalcs.atFuncs.hsaAt,
+        options.coords,
+        options.station.radius,
+        topSpotCount,
+        {},
+      )
       break;
   }
 
@@ -142,7 +148,8 @@ function comparatorTotal(a, b) {
   return b.harvest.total - a.harvest.total;
 }
 
-function stnAt(args) {
+function stnAt(coords, args) {
+  args.h = [coords.Q, coords.R];
   possibilities = calculateStn(args);
   return possibilities[0].harvest;
 }
@@ -156,35 +163,28 @@ function loadOptions(args){
     HD: {...defaults.HD},
     coords: new hexMath.Coords(args.h[0], args.h[1]),
   };
-  if (args.MF) {
-    if (args.MF[0]) {
-      options.MF.radius = args.MF[0];
-      if (args.MF[1]) {
-        options.MF.harvestRate = args.MF[1] / 100;
+  for(key in defaults){
+    if(args[key] && args[key][0]){
+      options[key].radius = args[key][0];
+      if(args[key][1]){
+        options[key].harvestRate = args[key][1] / 100;
       }
     }
   }
-  if (args.TP) {
-    if (args.TP[0]) {
-      options.TP.radius = args.TP[0];
-      if (args.TP[1]) {
-        options.TP.harvestRate = args.TP[1] / 100;
-      }
-    }
+  if (args.m && args.m[0]){
+    options.minHsa = args.m[0];
   }
-  if (args.MC) {
-    if (args.MC[0]) {
-      options.MC.radius = args.MC[0];
-      if (args.MC[1]) {
-        options.MC.harvestRate = args.MC[1] / 100;
-      }
-    }
+  if (args.sort && args.sort[0] && args.sort == "labor"){
+    options.sort = "labor";
+  } else {
+    options.sort = "rss";
   }
+  //console.log(options);
   return options;
 }
 
 function calculateStn(args) {
-  let outposts = args.o;
+  let outposts = [...args.outposts];
   let entries = 15;
   let options = loadOptions(args);
   let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
@@ -202,15 +202,24 @@ function calculateStn(args) {
     options
   );
   let possibleProductions = possibleOutpostProductions;
+  //console.log(options);
   for (i in possibleProductions) {
     for (key in refineryProduction) {
       possibleProductions[i].harvest[key] +=
         refineryProduction[key] + stationHarvest[key];
     }
-    possibleProductions[i].harvest.total =
+    if(options.sort == "rss"){
+      possibleProductions[i].harvest.total =
       possibleProductions[i].harvest.MR +
       possibleProductions[i].harvest.GR +
       possibleProductions[i].harvest.CR;
+    } else {
+      possibleProductions[i].harvest.total =
+      possibleProductions[i].harvest.LQ;
+    }
+    if(possibleProductions[i].harvest.hsaRed < options.minHsa){
+      possibleProductions[i].harvest.total = -1;
+    }
   }
   possibleProductions.sort(comparatorTotal);
   return possibleProductions.slice(

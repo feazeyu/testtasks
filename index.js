@@ -10,6 +10,7 @@ const unitPlanner = require("./unitPlanner");
 const stationPlanner = require("./stationPlanner");
 const { exception } = require("console");
 const pageSize = { rss: 10, stn: 5 };
+const validOutposts = { MF: 0, TP: 0, MC: 0, HSA: 0, CSA: 0, HD: 0 };
 var channel;
 const emoji = {
   crystal: "<:Crystal:757976643363930122>",
@@ -128,16 +129,22 @@ function createBestStnMsg(data) {
   for (x = begin; x < end; x++) {
     spots.push({
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
-      value: `${emoji.metal} ${data.harvest[x].MR} | ${emoji.gas} ${data.harvest[x].GR} | ${emoji.crystal} ${data.harvest[x].CR} | ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`,
+      value: `${emoji.metal} ${Math.floor(data.harvest[x].MR)} | ${
+        emoji.gas
+      } ${Math.floor(data.harvest[x].GR)} | ${emoji.crystal} ${Math.floor(
+        data.harvest[x].CR
+      )} | ${emoji.labor} ${Math.floor(
+        data.harvest[x].LQ
+      )} | Total: ${Math.floor(data.harvest[x].total)} | Hsa red: ${
+        data.harvest[x].hsaRed
+      } | Dist: ${data.harvest[x].dist}`,
     });
   }
 
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
-      `Best stations spots page ${data.pages.page + 1}/${
-        data.pages.limit
-      }:`
+      `Best stations spots page ${data.pages.page + 1}/${data.pages.limit}:`
     )
     .setDescription(
       `Sorted by ${data.textData.stuff} \n\tfor distance up to ${
@@ -369,6 +376,62 @@ function checkHsaArguments(args) {
   args.r = [1];
 }
 
+function checkStnsArguments(args) {
+  if (!("e" in args) || args.e.length == 0) {
+    // default size
+    args.e = [50];
+  }
+  if (args.e[0] <= 0) {
+    return "```Just tell me to shut up, no need to be mean```";
+  }
+  if (!("d" in args) || args.d.length < 2) {
+    args.d = [0, 0, mapCalcs.mapRadius];
+  }
+  if (args.d.length == 2) {
+    args.d.push(mapCalcs.mapRadius);
+  }
+  if (args.d[2] <= 0) {
+    return negativeIntegerErr;
+  }
+  if (args.d[2] >= 2 * mapCalcs.mapRadius) {
+    return "```The sea is not that big matey!```";
+  }
+  if (!args.outposts) {
+    args.outposts = [];
+  }
+  for(i in args.outposts){
+    if(!(args.outposts[i] in validOutposts)){
+      return "```" + args.outposts[i] + "is not a valid outpost!```";
+    }
+  }
+  if(!args.sort || !args.sort[0]){
+    args.sort = ["rss"];
+  }
+  if(args.sort[0] != "rss" && args.sort[0] != "labor"){
+    return "````Valid sorting is only by 'rss' or 'labor'! ```";
+  }
+}
+
+function checkStnArguments(args){
+  if (!args.outposts) {
+    args.outposts = [];
+  }
+  for(i in args.outposts){
+    if(!(args.outposts[i] in validOutposts)){
+      return "```" + args.outposts[i] + "is not a valid outpost!```";
+    }
+  }
+  if(!args.sort || !args.sort[0]){
+    args.sort = ["rss"];
+  }
+  if(args.sort[0] != "rss" && args.sort[0] != "labor"){
+    return "````Valid sorting is only by 'rss' or 'labor'! ```";
+  }
+  if (!("h" in args) || args.h.length < 2) {
+    return "```You have to specify base hex forrr this command to worrk! If you are looking for best station spots, use '!p stns' command instead!```";
+  }
+}
+
 function checkArguments(args) {
   if (!("e" in args) || args.e.length == 0) {
     // default size
@@ -463,12 +526,11 @@ function bestStnCommand(message, args, textData) {
   new_entry = new Entry(
     {
       harvest: harvest,
-      radius: args.r[0],
       middle: new hexMath.Coords(args.d[0], args.d[1]),
       maxDistance: args.d[2],
       pages: {
         page: 0,
-        limit: Math.ceil(harvest.length / pageSize.stn),
+        limit: Math.ceil(harvest.length / pageSize.rss),
       },
       maxEntries: harvest.length,
       textData: textData,
@@ -696,8 +758,21 @@ client.on("message", (message) => {
       break;
     case "stn":
       parsedArgs = parseArgs(args);
-      stnCommand(message, parsedArgs, {stuff: "rss"});
-      console.log("completed");
+      err = checkStnArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      stnCommand(message, parsedArgs, { stuff: parsedArgs.sort[0] });
+      break;
+    case "stns":
+      parsedArgs = parseArgs(args);
+      err = checkStnsArguments(parsedArgs);
+      if (err) {
+        message.channel.send(err);
+        break;
+      }
+      bestStnCommand(message, parsedArgs, { stuff: parsedArgs.sort[0] });
       break;
   }
 
@@ -724,7 +799,7 @@ function createStationMessage(data) {
         emoji.labor
       } ${Math.round(data.possibilities[x].harvest.LQ)} | Total: ${Math.round(
         data.possibilities[x].harvest.total
-      )}
+      )} | Hsa red: ${data.possibilities[x].harvest.hsaRed}
       Outpost coords: \n`,
     });
     for (key in data.possibilities[x].coords) {
@@ -737,12 +812,12 @@ function createStationMessage(data) {
   return new Discord.MessageEmbed()
     .setColor("#0099ff")
     .setTitle(
-      `Best outpost spots page ${data.pages.page + 1}/${
-        data.pages.limit
-      }:`
+      `Best outpost spots page ${data.pages.page + 1}/${data.pages.limit}:`
     )
     .setDescription(
-      `sorted by ${data.textData.stuff} \n\t for stn at ${data.middle.gotoCoords()}`
+      `sorted by ${
+        data.textData.stuff
+      } \n\t for stn at ${data.middle.gotoCoords()}`
     )
     .addFields(spots);
 }
