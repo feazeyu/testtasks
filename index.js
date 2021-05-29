@@ -1,7 +1,7 @@
 //TODO Parser should support floats sometimes
 const Discord = require("discord.js");
 const fs = require("fs");
-const alarm = require("./alarmr")
+const alarm = require("./alarmr");
 const hexMath = require("./hexMath");
 const mapCalcs = require("./mapCalcs");
 const help = require("./help.js");
@@ -391,13 +391,13 @@ function parseArgs(args) {
         value += args[i] + " ";
         i++;
       }
-      if(i < args.length){
+      if (i < args.length) {
         value += args[i].slice(0, -1);
       }
     } else {
       argKey = args[i];
     }
-    if(!(argKey in argDict)){
+    if (!(argKey in argDict)) {
       argDict[argKey] = [];
     }
     if (value != undefined) {
@@ -408,13 +408,41 @@ function parseArgs(args) {
   return argDict;
 }
 
+function bestStnCommand(message, args){
+  harvest = mapCalcs.bestTotalSpots(
+    stationPlanner.stnAt,
+    new hexMath.Coords(args.d[0], args.d[1]),
+    args.d[2],
+    args.e[0],
+    args,
+  );
+  new_entry = new Entry(
+    {
+      harvest: harvest,
+      radius: args.r[0],
+      middle: new hexMath.Coords(args.d[0], args.d[1]),
+      maxDistance: args.d[2],
+      pages: {
+        page: 0,
+        limit: Math.ceil(harvest.length / pageSize),
+      },
+      maxEntries: harvest.length,
+      textData: textData,
+    },
+    msgGenFnc,
+    message.channel
+  );
+  new_entry.sendMsg();
+
+}
+
 function bestSpotCommand(message, args, f, textData, msgGenFnc) {
   harvest = mapCalcs.bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
-    args.r[0],
     args.d[2],
-    args.e[0]
+    args.e[0],
+    { radius: args.r[0] }
   );
   //TODO Osetrit crashe pri nezadani argumentu
 
@@ -625,7 +653,7 @@ client.on("message", (message) => {
       break;
     case "stn":
       parsedArgs = parseArgs(args);
-      let msgData = stationPlanner.calculateStn(parsedArgs)
+      let msgData = stationPlanner.calculateStn(parsedArgs);
       console.log(msgData);
       console.log("completed");
       break;

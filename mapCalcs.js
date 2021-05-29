@@ -64,14 +64,14 @@ function comparatorTotal(a, b) {
   return b.total - a.total;
 }
 
-function bestTotalSpots(fnc, middle, radius, distance, entries) {
+function bestTotalSpots(fnc, middle, distance, entries, args) {
   let spots = [];
   let coordsArray = hexMath.coordsWithinRadius(middle, distance);
   for (i in coordsArray) {
     let hex = readHexCoords(coordsArray[i]);
     //console.log(hex);
     if (hex.id == 0) {
-      let data = fnc(hex.coords, radius);
+      let data = fnc(hex.coords, args);
       data["coords"] = hex.coords;
       data.dist = hexMath.distance(hex.coords, middle);
       spots.push(data);
@@ -81,8 +81,8 @@ function bestTotalSpots(fnc, middle, radius, distance, entries) {
   return spots.slice(0, Math.min(entries, spots.length));
 }
 
-function prospectAt(coords, radius){
-    return rssYieldAt(coords, radius, {
+function prospectAt(coords, args){
+    return rssYieldAt(coords, args.radius, {
         planets: {
             labor: 0,
             rss: 7.59, //7.59 because 6.9 is base, * 1.10 for apex mining lasers, ikr. Weird
@@ -116,8 +116,8 @@ function hsaAt(coords) {
   return reductionValue;
 }
 
-function rssAt(coords, radius) {
-  let data = accessRdata(coords, radius);
+function rssAt(coords, args) {
+  let data = accessRdata(coords, args.radius);
   //console.log(data);
   let HarvestValue = {
     LQ: data["1"].LQ + data["2"].LQ,
@@ -129,8 +129,8 @@ function rssAt(coords, radius) {
   return HarvestValue;
 }
 
-function laborAt(coords, radius) {
-  let data = accessRdata(coords, radius);
+function laborAt(coords, args) {
+  let data = accessRdata(coords, args.radius);
   let HarvestValue = {
     LQ: data["1"].LQ + data["2"].LQ,
     MR: data["1"].MR + data["2"].MR,
@@ -141,8 +141,8 @@ function laborAt(coords, radius) {
   return HarvestValue;
 }
 
-function fieldsAt(coords, radius) {
-  let data = accessRdata(coords, radius);
+function fieldsAt(coords, args) {
+  let data = accessRdata(coords, args.radius);
   let HarvestValue = {
     LQ: data["2"].LQ,
     MR: data["2"].MR,
@@ -153,8 +153,8 @@ function fieldsAt(coords, radius) {
   return HarvestValue;
 }
 
-function planetsAt(coords, radius) {
-  let data = accessRdata(coords, radius);
+function planetsAt(coords, args) {
+  let data = accessRdata(coords, args.radius);
   let HarvestValue = {
     LQ: data["1"].LQ,
     MR: data["1"].MR,
