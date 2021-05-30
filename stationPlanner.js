@@ -174,6 +174,11 @@ function loadOptions(args){
   if (args.m && args.m[0]){
     options.minHsa = args.m[0];
   }
+  if (args.e && args.e[0]){
+    options.entries = args.e[0];
+  } else {
+    options.entries = 20;
+  }
   if (args.sort && args.sort[0] && args.sort == "labor"){
     options.sort = "labor";
   } else {
@@ -185,7 +190,6 @@ function loadOptions(args){
 
 function calculateStn(args) {
   let outposts = [...args.outposts];
-  let entries = 15;
   let options = loadOptions(args);
   let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
   for (key in stationHarvest) {
@@ -224,7 +228,7 @@ function calculateStn(args) {
   possibleProductions.sort(comparatorTotal);
   return possibleProductions.slice(
     0,
-    Math.min(entries, possibleProductions.length)
+    Math.min(options.entries, possibleProductions.length)
   );
 }
 

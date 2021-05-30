@@ -201,59 +201,108 @@ function shipshelp(){
 
 function stnsHelp(){
  let msg = `
-  This command will return a list of the best station spots resource wise, with specifed outposts.
-  This is one hell of a command, so brace for a loooong one.
+ This command will return a list of the best station spots by rss or labor (if specified), with specifed outposts.
 
-  Required args: 
-      none, but it won't do much without any.
-  
-  Optional args:
-    
-  outposts <"Outpost"> <"Outpost"> <"Outpost">...: write the shorthand of an outpost after this in "" to add it to the station. For example, !p stns outposts "MF" "TP" would look for a station with a MF and a TP.
-    
-    m <number>: If you included "HSA" in your outposts, only stations with a hsa of <number> or more moon points will be shown. For example: !p stns outposts "MF" "HSA" m 6 would show the best resource spots for stations that have access to a 6% HSA
-   
-    MF, TP, MC, HD <radius> <harvestRate>: If you want different outposts than the default ones, add <OutpostName> <Radius> <HarvestRate>. For example: !p stns outposts "MF" "MF" "TP" MF 3 400 TP 2 325 would look for a station with 2 MF's that have 3 range each, 400% harvest rate and a TP with radius 2 and Harvest rate of 325%
-   
-    sort <"type">: Sort the results in different ways, currently supports only "rss" and "labor". For example: !p stns outposts "MF" "HD" HD 4 sort "labor" would look for a habdome, radius 4, MF radius 1 and would sort by labor.
-   
-    d <x> <y> <maxRadius>: Specify which hex to look from and how far. For example: !p stns d 0 0 5 outposts "MF" "TP" would look for a station to place up to 5 hexes away from 0 0, outposts can be outside this radius.
-   
-    e <entries>: Amount of entries to display.
-   
-    station <radius>: changes the station radius
+Required args: 
+    none
 
-    orgs <"Org"> <"Org"> <"Org">: Not yet implemented.
+Optional args:
+
+  outposts: <"Outpost"> <"Outpost"> <"Outpost">...:
+    A list of outposts, valid outposts are: "MF" "TP" "MC" "HD" "HSA" "CSA"
+
+  m: <min_hsa_red>:  
+    Use this option only with "HSA" or "CSA" included in outposts.
+    The results will show ONLY stations with HSA/CSA reduction equal or higher than <min_hsa_red>  
    
-    f <"Faction">: Not yet implemented.
+  station, MF, TP, MC, HD <radius> <harvest_rate>:
+   
+    These options will change the <radius> and <harvest_rate> of specified outpost (or the stn itself). Example:
+      
+      MF 3 450
+
+    will set <radius> of mining facilites to 3 and their <harvest_rate> to 450%
   
-  Default Values:
+  sort "labor":
     
+    Include this option to sort the results by labor, not by rss
+
+  d <x> <y> <max_distance>:
+    
+    Specifies the search area. Filters the results to show only stations with distance up to <max_distance> from the hex <x> <y> 
+   
+  e <entries>:
+    
+    Amount of entries to display.
+  
+Default Values:
+    
+  station: Radius 4 Harvest 73
   MF: Radius 1 Harvest 450
+  TP: Radius 1 Harvest 400
+  MC: Radius 2 Harvest 690
+  HD: Radius 2 Harvest 700
+  e: 50 entries
+  d: 0 0 whole map
+Example of a command I'd use to make a Workshed station:
   
-    TP: Radius 1 Harvest 400
-  
-    MC: Radius 2 Harvest 690
-  
-    HD: Radius 2 Harvest 700
-  
-    e: 50 entries
-  
-    d: 0 0 whole map
+  !p stns outposts "MF" "MF" "TP" "HSA" MF 3 400 TP 2 325 station 5 143 m 6 d 0 10 25 e 40
 
-  Example of a command I'd use to make a Workshed station: !p stns outposts "MF" "MF" "TP" "HSA" MF 3 400 TP 2 325 m 6
-    `
+  This command would show best spots by rss for stations that have 2 MF, 1 TP, 1 HSA, where:
+   MF's have radius 3 and harvest rate 400%, (MF 3 400)
+   TP has radius 2 and harvest rate 325%, (TP 2 325)
+   station with radius 5 (I plan NH) and harvest rate 143% (with RG) (station 5 143)
+  the results would be filtered to those that:
+   use at least 6% HSA (m 6)
+   have distance from hex /goto 0 10 up to 25 (d 0 10 25)
+   only top 40 spots will be shown (e 40)
+`
  return msg;
 }
 
 function stnHelp(){
   let msg = `
-  This command will look at all the ways how to put outpost down with a station on a specified hex, then outpust them sorted, with outpost locations.
-  The args are same as for !p stns, with an exception.
-  d <x> <y> <maxDist> is replaced by h <x> <y>
-  h <x> <y> is required.
+This command will look at all the ways how to put outpost down with a station on a specified hex, then outpust them sorted, with outpost locations.
 
-  Example command: !p stn h 14 23 outposts "MF" "MF" "TP" "HSA" MF 3 400 TP 2 325 m 0 sort "rss" 
+Required args: 
+  
+h <x> <y>:
+  
+  Specifies the hex where the station is built
+
+Optional args:
+
+outposts: <"Outpost"> <"Outpost"> <"Outpost">...:
+  A list of outposts, valid outposts are: "MF" "TP" "MC" "HD" "HSA" "CSA"
+
+m: <min_hsa_red>:  
+  Use this option only with "HSA" or "CSA" included in outposts.
+  The results will show ONLY stations with HSA/CSA reduction equal or higher than <min_hsa_red>  
+ 
+station, MF, TP, MC, HD <radius> <harvest_rate>:
+ 
+  These options will change the <radius> and <harvest_rate> of specified outpost (or the stn itself). Example:
+    
+    MF 3 450
+
+  will set <radius> of mining facilites to 3 and their <harvest_rate> to 450%
+
+sort "labor":
+  
+  Include this option to sort the results by labor, not by rss
+
+e <entries>:
+  
+  Amount of entries to display.
+
+Default Values:
+  
+station: Radius 4 Harvest 73
+MF: Radius 1 Harvest 450
+TP: Radius 1 Harvest 400
+MC: Radius 2 Harvest 690
+HD: Radius 2 Harvest 700
+e: 50 entries
   `
   return msg;
 }
