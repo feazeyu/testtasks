@@ -8,6 +8,7 @@ const help = require("./help.js");
 const { parse } = require("url");
 const unitPlanner = require("./unitPlanner");
 const stationPlanner = require("./stationPlanner");
+const config = require("./config.js");
 const { exception } = require("console");
 const pageSize = { rss: 10, stn: 5 };
 const validOutposts = { MF: 0, TP: 0, MC: 0, HSA: 0, CSA: 0, HD: 0 };
@@ -66,6 +67,8 @@ function tooBigRadiusError(radius) {
 
 client.once("ready", () => {
   console.log("Ready!");
+  config.loadConfig();
+  console.log(config.getConfig());
   channel = client.channels.cache.get("838491827400212513");
   client.user.setActivity("!p help", { type: "LISTENING" });
 });
@@ -779,6 +782,10 @@ client.on("message", (message) => {
         break;
       }
       bestStnCommand(message, parsedArgs, { stuff: parsedArgs.sort[0] });
+      break;
+    case "cfg":
+      parsedArgs = parseArgs(args);
+      config.editUserData(message.author, parsedArgs);
       break;
   }
 
