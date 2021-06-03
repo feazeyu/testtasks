@@ -108,6 +108,11 @@ optional arguments are:
         default values:
             d 0 0 map_radius
 
+    closest:
+  
+        add this to sort results by distance (still shows top "e" results)
+    
+
     e: entries
 
         entries: selects the number of top hexes shown
@@ -136,6 +141,10 @@ optional arguments are:
 
         default values:
             d 0 0 map_radius
+
+    closest:
+  
+        add this to sort results by distance (still shows top "e" results)
 
     e: entries
 
@@ -230,6 +239,14 @@ Optional args:
     
     Include this option to sort the results by labor, not by rss
 
+  w <Metal> <Gas> <Crystal> <Labour>:
+
+    The values are weights for each of those resources that are used for calculation of the value "total". The results are sorted by "total", unless "closest" is used
+  
+  closest:
+  
+    add this to sort results by distance (still shows top "e" results)
+
   d <x> <y> <max_distance>:
     
     Specifies the search area. Filters the results to show only stations with distance up to <max_distance> from the hex <x> <y> 
@@ -293,6 +310,10 @@ station, MF, TP, MC, HD <radius> <harvest_rate>:
 sort "labor":
   
   Include this option to sort the results by labor, not by rss
+
+w <Metal> <Gas> <Crystal> <Labour>:
+
+  The values are weights for each of those resources that are used for calculation of the value "total". The results are sorted by "total", unless "closest" is used
 
 e <entries>:
   
