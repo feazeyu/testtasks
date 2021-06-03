@@ -50,7 +50,7 @@ function calculateOutpostProduction(outposts, options) {
         options.coords,
         options.station.radius,
         topSpotCount,
-        { radius: options.MF.radius }
+        { radius: options.MF.radius, map: options.map }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.MF.harvestRate;
@@ -65,7 +65,7 @@ function calculateOutpostProduction(outposts, options) {
         options.coords,
         options.station.radius,
         topSpotCount,
-        { radius: options.TP.radius }
+        { radius: options.TP.radius, map: options.map }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ = 0;
@@ -80,7 +80,7 @@ function calculateOutpostProduction(outposts, options) {
         options.coords,
         options.station.radius,
         topSpotCount,
-        { radius: options.MC.radius }
+        { radius: options.MC.radius, map: options.map }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ = 0;
@@ -95,7 +95,7 @@ function calculateOutpostProduction(outposts, options) {
         options.coords,
         options.station.radius,
         topSpotCount,
-        { radius: options.HD.radius }
+        { radius: options.HD.radius, map: options.map }
       );
       for (let i = 0; i < topSpotCount; i++) {
         harvests[i].LQ *= options.HD.harvestRate;
@@ -111,8 +111,8 @@ function calculateOutpostProduction(outposts, options) {
         options.coords,
         options.station.radius,
         topSpotCount,
-        {},
-      )
+        { map: options.map }
+      );
       break;
   }
 
@@ -154,35 +154,40 @@ function stnAt(coords, args) {
   return possibilities[0].harvest;
 }
 
-function loadOptions(args){
+function loadOptions(args) {
   let options = {
-  station: {...defaults.station},
-    MF: {...defaults.MF},
-    TP: {...defaults.TP},
-    MC: {...defaults.MC},
-    HD: {...defaults.HD},
+    station: { ...defaults.station },
+    MF: { ...defaults.MF },
+    TP: { ...defaults.TP },
+    MC: { ...defaults.MC },
+    HD: { ...defaults.HD },
     coords: new hexMath.Coords(args.h[0], args.h[1]),
   };
-  for(key in defaults){
-    if(args[key] && args[key][0]){
+  for (key in defaults) {
+    if (args[key] && args[key][0]) {
       options[key].radius = args[key][0];
-      if(args[key][1]){
+      if (args[key][1]) {
         options[key].harvestRate = args[key][1] / 100;
       }
     }
   }
-  if (args.m && args.m[0]){
+  if (args.m && args.m[0]) {
     options.minHsa = args.m[0];
   }
-  if (args.e && args.e[0]){
+  if (args.e && args.e[0]) {
     options.entries = args.e[0];
   } else {
     options.entries = 20;
   }
-  if (args.sort && args.sort[0] && args.sort == "labor"){
+  options.map = args.map[0];
+  if (args.sort && args.sort[0] && args.sort == "labor") {
     options.sort = "labor";
   } else {
     options.sort = "rss";
+  }
+  if (args.w) {
+    options.sort = "weighted";
+    options.weights = args.w;
   }
   //console.log(options);
   return options;
@@ -191,7 +196,10 @@ function loadOptions(args){
 function calculateStn(args) {
   let outposts = [...args.outposts];
   let options = loadOptions(args);
-  let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, options.station);
+  let stationHarvest = mapCalcs.atFuncs.rssAt(options.coords, {
+    radius: options.station.radius,
+    map: options.map,
+  });
   for (key in stationHarvest) {
     stationHarvest[key] *= options.station.harvestRate;
   }
@@ -212,16 +220,25 @@ function calculateStn(args) {
       possibleProductions[i].harvest[key] +=
         refineryProduction[key] + stationHarvest[key];
     }
-    if(options.sort == "rss"){
-      possibleProductions[i].harvest.total =
-      possibleProductions[i].harvest.MR +
-      possibleProductions[i].harvest.GR +
-      possibleProductions[i].harvest.CR;
-    } else {
-      possibleProductions[i].harvest.total =
-      possibleProductions[i].harvest.LQ;
+    switch (options.sort) {
+      case "rss":
+        possibleProductions[i].harvest.total =
+          possibleProductions[i].harvest.MR +
+          possibleProductions[i].harvest.GR +
+          possibleProductions[i].harvest.CR;
+        break;
+      case "labor":
+        possibleProductions[i].harvest.total =
+          possibleProductions[i].harvest.LQ;
+        break;
+      case "weighted":
+        possibleProductions[i].harvest.total =
+          possibleProductions[i].harvest.MR*options.weights[0] +
+          possibleProductions[i].harvest.GR*options.weights[1] +
+          possibleProductions[i].harvest.CR*options.weights[2] +
+          possibleProductions[i].harvest.LQ*options.weights[3];
     }
-    if(possibleProductions[i].harvest.hsaRed < options.minHsa){
+    if (possibleProductions[i].harvest.hsaRed < options.minHsa) {
       possibleProductions[i].harvest.total = -1;
     }
   }

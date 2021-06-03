@@ -1,10 +1,11 @@
 const fs = require("fs");
 const hexMath = require("./hexMath");
-var map;
-var hexArray = [];
+var maps = {};
+var hexArrays = {};
 const CellDefinitions = JSON.parse(
   fs.readFileSync("./resources/CELL_DEFINITIONS.json")
 );
+const validMaps = ["omega", "thunderdome"];
 var CellDefinitionsDict = {};
 var rData = {};
 function initCellDefinitionDict() {
@@ -25,50 +26,68 @@ class Hex {
   }
 }
 
-loadMap("./resources/JsonMapThunderdome.json");
-function loadMap(path) {
+function availableMaps() {
+  let msg = "";
+  for (i in validMaps) {
+    msg += '"' + validMaps[i] + '" ';
+  }
+  return msg;
+}
+
+for (i in validMaps) {
+  loadMap(validMaps[i]);
+}
+function loadMap(name) {
   let data = "";
-  map = JSON.parse(fs.readFileSync(path));
-  for (q = -map.MapRadius; q <= map.MapRadius; q++) {
-    hexArray.push([]);
-    for (r = -map.MapRadius; r <= map.MapRadius; r++) {
-      hexArray[q + map.MapRadius].push(new Hex(q, r, 0)); //Create a 2d array for further population.
+  hexArrays[name] = [];
+  maps[name] = JSON.parse(fs.readFileSync("./resources/" + name + ".map.json"));
+  for (q = -maps[name].MapRadius; q <= maps[name].MapRadius; q++) {
+    hexArrays[name].push([]);
+    for (r = -maps[name].MapRadius; r <= maps[name].MapRadius; r++) {
+      hexArrays[name][q + maps[name].MapRadius].push(new Hex(q, r, 0)); //Create a 2d array for further population.
     }
   }
-  for (x = 0; x < map.Templates.length; x++) {
-    for (i = 0; i < map.Templates[x].Hexes.length; i++) {
-      hexArray[map.Templates[x].Hexes[i].Position.Q + map.MapRadius][
-        map.Templates[x].Hexes[i].Position.R + map.MapRadius
-      ] = new Hex(
-        map.Templates[x].Hexes[i].Position.Q,
-        map.Templates[x].Hexes[i].Position.R,
-        map.Templates[x].Hexes[i].ContentID
-      );
+  for (x = 0; x < maps[name].Templates.length; x++) {
+    for (i = 0; i < maps[name].Templates[x].Hexes.length; i++) {
+      hexArrays[name][
+        maps[name].Templates[x].Hexes[i].Position.Q + maps[name].MapRadius
+      ][maps[name].Templates[x].Hexes[i].Position.R + maps[name].MapRadius] =
+        new Hex(
+          maps[name].Templates[x].Hexes[i].Position.Q,
+          maps[name].Templates[x].Hexes[i].Position.R,
+          maps[name].Templates[x].Hexes[i].ContentID
+        );
       //data += "{ Position: { Q: " + map.Templates[x].Hexes[i].Position.Q + ", R: " + map.Templates[x].Hexes[i].Position.R + " }, ContentID: " +  map.Templates[x].Hexes[i].ContentID + "},\n"
     }
   }
 }
 
-function readHexCoords(coords) {
-  return readHex(coords.Q, coords.R);
+function readHexCoords(coords, map) {
+  return readHex(coords.Q, coords.R, map);
 }
-function readHex(q, r) {
-  if (Math.abs(q) > map.MapRadius || Math.abs(r) > map.MapRadius) {
+function readHex(q, r, map) {
+  if (Math.abs(q) > maps[map].MapRadius || Math.abs(r) > maps[map].MapRadius) {
     return new Hex(q, r, 0);
   }
   //console.log("Q: " + q + " R: " + r);
-  return hexArray[parseInt(q) + map.MapRadius][parseInt(r) + map.MapRadius];
+  return hexArrays[map][parseInt(q) + maps[map].MapRadius][
+    parseInt(r) + maps[map].MapRadius
+  ];
 }
 
 function comparatorTotal(a, b) {
   return b.total - a.total;
 }
 
+function comparatorDist(a, b) {
+  return a.dist - b.dist;
+}
+
 function bestTotalSpots(fnc, middle, distance, entries, args) {
   let spots = [];
   let coordsArray = hexMath.coordsWithinRadius(middle, distance);
   for (i in coordsArray) {
-    let hex = readHexCoords(coordsArray[i]);
+    let hex = readHexCoords(coordsArray[i], args.map);
     //console.log(hex);
     if (hex.id == 0) {
       let data = fnc(hex.coords, args);
@@ -78,37 +97,54 @@ function bestTotalSpots(fnc, middle, distance, entries, args) {
     }
   }
   spots.sort(comparatorTotal);
-  return spots.slice(0, Math.min(entries, spots.length));
+  spots = spots.slice(0, Math.min(entries, spots.length));
+  console.log(spots[0]);
+  if(args.closest){
+    spots.sort(comparatorDist);
+  }
+  return spots;
 }
 
-function prospectAt(coords, args){
-    return rssYieldAt(coords, args.radius, {
-        planets: {
-            labor: 0,
-            rss: 7.59, //7.59 because 6.9 is base, * 1.10 for apex mining lasers, ikr. Weird
-        },
-        fields: {
-            labor: 0,
-            rss: 2.5,
-        }
-    })
+function prospectAt(coords, args) {
+  return rssYieldAt(
+    coords,
+    args,
+    {
+      planets: {
+        labor: 0,
+        rss: 7.59, //7.59 because 6.9 is base, * 1.10 for apex mining lasers, ikr. Weird
+      },
+      fields: {
+        labor: 0,
+        rss: 2.5,
+      },
+    },
+  );
 }
 
-function rssYieldAt(coords, radius, yields){
-    let harvestPlanets = planetsAt(coords, radius);
-    let harvestFields = fieldsAt(coords, radius);
-    let yield = {
-        LQ: harvestFields.LQ * yields.fields.labor + harvestPlanets.LQ * yields.planets.labor,
-        MR: harvestFields.MR * yields.fields.rss + harvestPlanets.MR * yields.planets.rss,
-        GR: harvestFields.GR * yields.fields.rss + harvestPlanets.GR * yields.planets.rss,
-        CR: harvestFields.CR * yields.fields.rss + harvestPlanets.CR * yields.planets.rss,
-    }
-    yield.total = yield.MR + yield.GR + yield.CR;
-    return yield;
+function rssYieldAt(coords, args, yields) {
+  let harvestPlanets = planetsAt(coords, args);
+  let harvestFields = fieldsAt(coords, args);
+  let yield = {
+    LQ:
+      harvestFields.LQ * yields.fields.labor +
+      harvestPlanets.LQ * yields.planets.labor,
+    MR:
+      harvestFields.MR * yields.fields.rss +
+      harvestPlanets.MR * yields.planets.rss,
+    GR:
+      harvestFields.GR * yields.fields.rss +
+      harvestPlanets.GR * yields.planets.rss,
+    CR:
+      harvestFields.CR * yields.fields.rss +
+      harvestPlanets.CR * yields.planets.rss,
+  };
+  yield.total = yield.MR + yield.GR + yield.CR;
+  return yield;
 }
 
-function hsaAt(coords) {
-  let data = accessRdata(coords, 1);
+function hsaAt(coords, args) {
+  let data = accessRdata(coords, 1, args.map);
   let reductionValue = {
     hsaRed: data["1"].hsaRed,
     total: data["1"].hsaRed,
@@ -117,7 +153,7 @@ function hsaAt(coords) {
 }
 
 function rssAt(coords, args) {
-  let data = accessRdata(coords, args.radius);
+  let data = accessRdata(coords, args.radius, args.map);
   //console.log(data);
   let HarvestValue = {
     LQ: data["1"].LQ + data["2"].LQ,
@@ -130,7 +166,7 @@ function rssAt(coords, args) {
 }
 
 function laborAt(coords, args) {
-  let data = accessRdata(coords, args.radius);
+  let data = accessRdata(coords, args.radius, args.map);
   let HarvestValue = {
     LQ: data["1"].LQ + data["2"].LQ,
     MR: data["1"].MR + data["2"].MR,
@@ -142,7 +178,7 @@ function laborAt(coords, args) {
 }
 
 function fieldsAt(coords, args) {
-  let data = accessRdata(coords, args.radius);
+  let data = accessRdata(coords, args.radius, args.map);
   let HarvestValue = {
     LQ: data["2"].LQ,
     MR: data["2"].MR,
@@ -154,7 +190,7 @@ function fieldsAt(coords, args) {
 }
 
 function planetsAt(coords, args) {
-  let data = accessRdata(coords, args.radius);
+  let data = accessRdata(coords, args.radius, args.map);
   let HarvestValue = {
     LQ: data["1"].LQ,
     MR: data["1"].MR,
@@ -165,16 +201,19 @@ function planetsAt(coords, args) {
   return HarvestValue;
 }
 
-function accessRdata(coords, radius) {
+function accessRdata(coords, radius, map) {
   //console.log("acessing data within r: " + radius + " at:");
   //console.log(coords);
-  if (!rData[radius]) {
+  if (!(map in rData)) {
+    rData[map] = {};
+  }
+  if (!rData[map][radius]) {
     //console.log("precalcing data");
-    precalcRdata(radius);
+    precalcRdata(radius, map);
   }
   if (
-    Math.abs(coords.Q) > map.MapRadius ||
-    Math.abs(coords.R) > map.MapRadius
+    Math.abs(coords.Q) > maps[map].MapRadius ||
+    Math.abs(coords.R) > maps[map].MapRadius
   ) {
     return {
       1: {
@@ -194,22 +233,24 @@ function accessRdata(coords, radius) {
     };
   }
 
-  return rData[radius][coords.Q + map.MapRadius][coords.R + map.MapRadius];
+  return rData[map][radius][coords.Q + maps[map].MapRadius][
+    coords.R + maps[map].MapRadius
+  ];
 }
 
-function precalcRdata(radius) {
-  console.log("precalcing data for r: " + radius);
-  if (rData[radius]) {
+function precalcRdata(radius, map) {
+  console.log(`precalcing data for r: ${radius} map: ${map}`);
+  if (rData[map][radius]) {
     console.log("data already precalced");
     return;
   }
-  rData[radius] = [];
-  for (let q = -map.MapRadius; q <= map.MapRadius; q++) {
-    rData[radius].push([]);
-    for (let r = -map.MapRadius; r <= map.MapRadius; r++) {
-      rData[radius][q + map.MapRadius].push({
-        1: rssWithinRadius(new hexMath.Coords(q, r), radius, ["1", "3"]),
-        2: rssWithinRadius(new hexMath.Coords(q, r), radius, ["2"]),
+  rData[map][radius] = [];
+  for (let q = -maps[map].MapRadius; q <= maps[map].MapRadius; q++) {
+    rData[map][radius].push([]);
+    for (let r = -maps[map].MapRadius; r <= maps[map].MapRadius; r++) {
+      rData[map][radius][q + maps[map].MapRadius].push({
+        1: rssWithinRadius(new hexMath.Coords(q, r), radius, ["1", "3"], map),
+        2: rssWithinRadius(new hexMath.Coords(q, r), radius, ["2"], map),
       });
     }
   }
@@ -228,7 +269,7 @@ function redFromSize(size) {
   }
 }
 
-function rssWithinRadius(middle, radius, types) {
+function rssWithinRadius(middle, radius, types, map) {
   let HarvestValue = {
     LQ: 0,
     MR: 0,
@@ -239,7 +280,7 @@ function rssWithinRadius(middle, radius, types) {
   //console.log("Cords with rad: " + hexMath.coordsWithinRadius(middle, radius));
   let coordsArray = hexMath.coordsWithinRadius(middle, radius);
   for (i in coordsArray) {
-    let hex = readHexCoords(coordsArray[i]);
+    let hex = readHexCoords(coordsArray[i], map);
     //console.log(hex);
     if (types.includes(hex.type)) {
       for (key in hex.HarvestValue) {
@@ -254,12 +295,13 @@ function rssWithinRadius(middle, radius, types) {
 }
 
 exports.bestTotalSpots = bestTotalSpots;
-exports.mapRadius = map.MapRadius;
+exports.maps = maps;
+exports.availableMaps = availableMaps;
 exports.atFuncs = {
-    hsaAt: hsaAt,
-    rssAt: rssAt,
-    fieldsAt: fieldsAt,
-    planetsAt: planetsAt,
-    laborAt: laborAt,
-    prospectAt: prospectAt,
+  hsaAt: hsaAt,
+  rssAt: rssAt,
+  fieldsAt: fieldsAt,
+  planetsAt: planetsAt,
+  laborAt: laborAt,
+  prospectAt: prospectAt,
 };

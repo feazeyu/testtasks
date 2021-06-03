@@ -9,7 +9,8 @@ const commands = [
   "prospect",
   "ships",
   "stns",
-  "stn"
+  "stn",
+  "map",
 ];
 
 function help(command) {
@@ -51,6 +52,8 @@ function help(command) {
       return stnHelp();
     case "stns":
       return stnsHelp();
+    case "map":
+      return mapHelp();
     default:
       return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
   }
@@ -306,4 +309,26 @@ e: 50 entries
   `
   return msg;
 }
+
+function mapHelp(){
+  let msg = `
+This command is used to set user's default map that is used for the commands.
+Usage:
+
+!p map "<map_name>"
+
+If the argument "<map_name>" is invalid or ommitted, the command will also list valid maps.
+
+Example command, that will set map to omega:
+
+!p map "omega"
+
+Default map for each user is "omega".
+
+`
+
+return msg;
+
+}
+
 exports.help = help;

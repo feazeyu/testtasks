@@ -68,7 +68,6 @@ function tooBigRadiusError(radius) {
 client.once("ready", () => {
   console.log("Ready!");
   config.loadConfig();
-  console.log(config.getConfig());
   channel = client.channels.cache.get("838491827400212513");
   client.user.setActivity("!p help", { type: "LISTENING" });
 });
@@ -152,7 +151,8 @@ function createBestStnMsg(data) {
     .setDescription(
       `Sorted by ${data.textData.stuff} \n\tfor distance up to ${
         data.maxDistance
-      } from ${data.middle.gotoCoords()}`
+      } from ${data.middle.gotoCoords()}
+      map: ${data.textData.map}`
     )
     .addFields(spots);
 }
@@ -166,20 +166,15 @@ function createBestSpotsMsg(data) {
   for (x = begin; x < end; x++) {
     spots.push({
       name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
-      value: `${emoji.metal} ${data.harvest[x].MR} | ${emoji.gas} ${data.harvest[x].GR} | ${emoji.crystal} ${data.harvest[x].CR} | ${emoji.labor} ${data.harvest[x].LQ} | Total: ${data.harvest[x].total} | Dist: ${data.harvest[x].dist}`,
-      /*value:
-        data.harvest[x].MR +
-        "<:Metal:757976643493953688> " +
-        data.harvest[x].GR +
-        "<:Gas:757976643204546618> " +
-        data.harvest[x].CR +
-        "<:Crystal:757976643363930122> " +
-        data.harvest[x].LQ +
-        "<:labor:839506095864676363>" +
-        " | Total: " +
-        data.harvest[x].total +
-        " | Distance: " +
-        data.harvest[x].dist,*/
+      value: `${emoji.metal} ${Math.floor(data.harvest[x].MR)} | ${
+        emoji.gas
+      } ${Math.floor(data.harvest[x].GR)} | ${emoji.crystal} ${Math.floor(
+        data.harvest[x].CR
+      )} | ${emoji.labor} ${Math.floor(
+        data.harvest[x].LQ
+      )} | Total: ${Math.floor(data.harvest[x].total)} | Dist: ${
+        data.harvest[x].dist
+      }`,
     });
   }
 
@@ -195,7 +190,8 @@ function createBestSpotsMsg(data) {
         data.radius
       } \n\tfor distance up to ${
         data.maxDistance
-      } from ${data.middle.gotoCoords()}`
+      } from ${data.middle.gotoCoords()}
+      map: ${data.textData.map}`
     )
     .addFields(spots);
 }
@@ -226,9 +222,9 @@ function createBestHsaMsg(data) {
       }:`
     )
     .setDescription(
-      `${data.textData.stuff} \n\tfor distance up to ${
-        data.maxDistance
-      } from ${data.middle.gotoCoords()}`
+      `${data.textData.stuff}
+      for distance up to ${data.maxDistance} from ${data.middle.gotoCoords()}
+      map: ${data.textData.map}`
     )
     .addFields(spots);
 }
@@ -361,19 +357,22 @@ function checkHsaArguments(args) {
     // default size
     args.e = [50];
   }
+  if (!(args.map[0] in mapCalcs.maps)) {
+    return "```Invalid map scrrrew it!```";
+  }
   if (args.e[0] <= 0) {
     return "```Just tell me to shut up, no need to be mean```";
   }
   if (!("d" in args) || args.d.length < 2) {
-    args.d = [0, 0, mapCalcs.mapRadius];
+    args.d = [0, 0, mapCalcs.maps[args.map[0]].MapRadius];
   }
   if (args.d.length == 2) {
-    args.d.push(mapCalcs.mapRadius);
+    args.d.push(mapCalcs.maps[args.map[0]].MapRadius);
   }
   if (args.d[2] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.d[2] >= 2 * mapCalcs.mapRadius) {
+  if (args.d[2] >= 2 * mapCalcs.maps[args.map[0]].MapRadius) {
     return "```The sea is not that big matey!```";
   }
   args.r = [1];
@@ -384,60 +383,76 @@ function checkStnsArguments(args) {
     // default size
     args.e = [50];
   }
+  if (!(args.map[0] in mapCalcs.maps)) {
+    return "```Invalid map scrrrew it!```";
+  }
   if (args.e[0] <= 0) {
     return "```Just tell me to shut up, no need to be mean```";
   }
   if (!("d" in args) || args.d.length < 2) {
-    args.d = [0, 0, mapCalcs.mapRadius];
+    args.d = [0, 0, mapCalcs.maps[args.map[0]].MapRadius];
   }
   if (args.d.length == 2) {
-    args.d.push(mapCalcs.mapRadius);
+    args.d.push(mapCalcs.maps[args.map[0]].MapRadius);
   }
   if (args.d[2] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.d[2] >= 2 * mapCalcs.mapRadius) {
+  if (args.d[2] >= 2 * mapCalcs.maps[args.map[0]].MapRadius) {
     return "```The sea is not that big matey!```";
   }
   if (!args.outposts) {
     args.outposts = [];
   }
-  for(i in args.outposts){
-    if(!(args.outposts[i] in validOutposts)){
+  for (i in args.outposts) {
+    if (!(args.outposts[i] in validOutposts)) {
       return "```" + args.outposts[i] + "is not a valid outpost!```";
     }
   }
-  if(args.outposts.length > 5){
+  if (args.outposts.length > 5) {
     return "```You won't fit that many outposts, or will ya?!```";
   }
-  if(!args.sort || !args.sort[0]){
+  if (!args.sort || !args.sort[0]) {
     args.sort = ["rss"];
   }
-  if(args.sort[0] != "rss" && args.sort[0] != "labor"){
-    return "````Valid sorting is only by 'rss' or 'labor'! ```";
+  if (args.sort[0] != "rss" && args.sort[0] != "labor") {
+    return "````Valid sorting is only by 'rss' or 'labor' (or using 'w' as weight sorting)! ```";
+  }
+  if (args.w){
+    while(args.w.length < 4){
+      args.w.psuh(0);
+    }
   }
 }
 
-function checkStnArguments(args){
+function checkStnArguments(args) {
   if (!args.outposts) {
     args.outposts = [];
   }
-  for(i in args.outposts){
-    if(!(args.outposts[i] in validOutposts)){
+  if (!(args.map[0] in mapCalcs.maps)) {
+    return "```Invalid map scrrrew it!```";
+  }
+  for (i in args.outposts) {
+    if (!(args.outposts[i] in validOutposts)) {
       return "```" + args.outposts[i] + "is not a valid outpost!```";
     }
   }
-  if(args.outposts.length > 5){
+  if (args.outposts.length > 5) {
     return "```You won't fit that many outposts, or will ya?!```";
   }
-  if(!args.sort || !args.sort[0]){
+  if (!args.sort || !args.sort[0]) {
     args.sort = ["rss"];
   }
-  if(args.sort[0] != "rss" && args.sort[0] != "labor"){
-    return "````Valid sorting is only by 'rss' or 'labor'! ```";
+  if (args.sort[0] != "rss" && args.sort[0] != "labor") {
+    return "````Valid sorting is only by 'rss' or 'labor' (or using 'w' as weight sorting)! ```";
   }
   if (!("h" in args) || args.h.length < 2) {
     return "```You have to specify base hex forrr this command to worrk! If you are looking for best station spots, use '!p stns' command instead!```";
+  }
+  if (args.w){
+    while(args.w.length < 4){
+      args.w.psuh(0);
+    }
   }
 }
 
@@ -445,6 +460,9 @@ function checkArguments(args) {
   if (!("e" in args) || args.e.length == 0) {
     // default size
     args.e = [50];
+  }
+  if (!(args.map[0] in mapCalcs.maps)) {
+    return "```Invalid map scrrrew it!```";
   }
   if (!("r" in args) || args.r.length == 0) {
     return needToSpecifyRadiusError;
@@ -459,26 +477,30 @@ function checkArguments(args) {
     return "```Just tell me to shut up, no need to be mean```";
   }
   if (!("d" in args) || args.d.length < 2) {
-    args.d = [0, 0, mapCalcs.mapRadius];
+    args.d = [0, 0, mapCalcs.maps[args.map[0]].MapRadius];
   }
   if (args.d.length == 2) {
-    args.d.push(mapCalcs.mapRadius);
+    args.d.push(mapCalcs.maps[args.map[0]].MapRadius);
   }
   if (args.d[2] <= 0) {
     return negativeIntegerErr;
   }
-  if (args.d[2] >= 2 * mapCalcs.mapRadius) {
+  if (args.d[2] >= 2 * mapCalcs.maps[args.map[0]].MapRadius) {
     return "```The sea is not that big matey!```";
+  }
+  if (args.sort && args.sort[0] && args.sort[0] != "dist") {
+    return "````Valid sorting for this command is only by 'dist'```";
   }
 }
 // !p rss r 4 d -12 25 -> {"r": [r], "d": [-12, 25]}
-function parseArgs(args) {
+function parseArgs(args, defaults) {
   let i = 2;
-  let argDict = { base: [] };
+  let argDict = { ...defaults };
+  argDict["base"] = [];
   let argKey = "base";
   while (i < args.length) {
     let value = undefined;
-    let num = parseInt(args[i]);
+    let num = parseFloat(args[i]);
     if (!isNaN(num)) {
       value = num;
     } else if (args[i][0] == '"') {
@@ -493,10 +515,11 @@ function parseArgs(args) {
       }
     } else {
       argKey = args[i];
-    }
-    if (!(argKey in argDict)) {
       argDict[argKey] = [];
     }
+    /*if (!(argKey in argDict)) {
+      argDict[argKey] = [];
+    }*/
     if (value != undefined) {
       argDict[argKey].push(value);
     }
@@ -551,12 +574,13 @@ function bestStnCommand(message, args, textData) {
 }
 
 function bestSpotCommand(message, args, f, textData, msgGenFnc) {
+  console.log(args);
   harvest = mapCalcs.bestTotalSpots(
     f,
     new hexMath.Coords(args.d[0], args.d[1]),
     args.d[2],
     args.e[0],
-    { radius: args.r[0] }
+    { radius: args.r[0], map: args.map[0], closest: args.closest}
   );
   //TODO Osetrit crashe pri nezadani argumentu
 
@@ -586,8 +610,11 @@ client.on("message", (message) => {
   if (args[0] != prefix) {
     return;
   }
-  console.log("inc request");
+  console.log(
+    `inc request from user ${message.author.username} id ${message.author.id}`
+  );
   console.log(args);
+  let userConfig = config.getConfig(message.author);
   //try {
   if (args.length <= 1) {
     message.channel.send(wrongSyntaxErr);
@@ -604,7 +631,7 @@ client.on("message", (message) => {
       message.channel.send("```" + helpMsg + "```");
       break;
     case "rss": //RSS command
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -617,12 +644,13 @@ client.on("message", (message) => {
         {
           title: "resource",
           stuff: "Fields, Planets and Moons",
+          map: parsedArgs.map[0],
         },
         createBestSpotsMsg
       );
       break;
     case "labor":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -635,12 +663,13 @@ client.on("message", (message) => {
         {
           title: "labor",
           stuff: "Fields, Planets and Moons",
+          map: parsedArgs.map[0],
         },
         createBestSpotsMsg
       );
       break;
     case "planets":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -653,12 +682,13 @@ client.on("message", (message) => {
         {
           title: "resource",
           stuff: "Planets and Moons",
+          map: parsedArgs.map[0],
         },
         createBestSpotsMsg
       );
       break;
     case "fields":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -671,12 +701,13 @@ client.on("message", (message) => {
         {
           title: "resource",
           stuff: "Fields",
+          map: parsedArgs.map[0],
         },
         createBestSpotsMsg
       );
       break;
     case "prospect":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -689,12 +720,13 @@ client.on("message", (message) => {
         {
           title: "resource",
           stuff: "Total Prospect MC rss generation",
+          map: parsedArgs.map[0],
         },
         createBestSpotsMsg
       );
       break;
     case "hsa":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkHsaArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -707,12 +739,13 @@ client.on("message", (message) => {
         {
           title: "hsa",
           stuff: "Moons",
+          map: parsedArgs.map[0],
         },
         createBestHsaMsg
       );
       break;
     case "rtime":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkRtimeArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
@@ -753,7 +786,7 @@ client.on("message", (message) => {
       }
       break;
     case "ships":
-      args = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       checkShipArgs(args);
       message.channel.send(calculateShips(args));
 
@@ -762,30 +795,52 @@ client.on("message", (message) => {
       message.channel.send(wrongSyntaxErr);
       break;
     case "alarm":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       alarm.setAlarm(message.author, parsedArgs);
       break;
     case "stn":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkStnArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
         break;
       }
-      stnCommand(message, parsedArgs, { stuff: parsedArgs.sort[0] });
+      stnCommand(message, parsedArgs, {
+        stuff: parsedArgs.sort[0],
+        map: parsedArgs.map[0],
+      });
       break;
     case "stns":
-      parsedArgs = parseArgs(args);
+      parsedArgs = parseArgs(args, userConfig);
       err = checkStnsArguments(parsedArgs);
       if (err) {
         message.channel.send(err);
         break;
       }
-      bestStnCommand(message, parsedArgs, { stuff: parsedArgs.sort[0] });
+      bestStnCommand(message, parsedArgs, {
+        stuff: parsedArgs.sort[0],
+        map: parsedArgs.map[0],
+      });
       break;
-    case "cfg":
-      parsedArgs = parseArgs(args);
-      config.editUserData(message.author, parsedArgs);
+    case "map":
+      parsedArgs = parseArgs(args, userConfig);
+      if (
+        parsedArgs["base"].length < 1 ||
+        !(parsedArgs["base"][0] in mapCalcs.maps)
+      ) {
+        message.channel.send(
+          "```Available maps are: " + mapCalcs.availableMaps() + "```"
+        );
+      } else {
+        config.editUserData(message.author, { map: parsedArgs["base"] });
+      }
+      message.channel.send(
+        "```Current selected map for user: " +
+          message.author.username +
+          " is: " +
+          config.getConfig(message.author).map[0] +
+          "```"
+      );
       break;
   }
 
@@ -828,9 +883,9 @@ function createStationMessage(data) {
       `Best outpost spots page ${data.pages.page + 1}/${data.pages.limit}:`
     )
     .setDescription(
-      `sorted by ${
-        data.textData.stuff
-      } \n\t for stn at ${data.middle.gotoCoords()}`
+      `sorted by ${data.textData.stuff}
+      for stn at ${data.middle.gotoCoords()}
+      map: ${data.textData.map}`
     )
     .addFields(spots);
 }
