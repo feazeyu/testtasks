@@ -19,43 +19,43 @@ function help(command) {
   }
   switch (command) {
     case "help":
-      return baseHelp();
+      return [baseHelp()];
     case "rss":
-      return rsshelp(
+      return [rsshelp(
         "This command shows best spots by total Resources from Fields, Planets and Moons within selected radius"
-      );
+      )];
     case "labor":
-      return rsshelp(
+      return [rsshelp(
         "This command shows best spots by total Labor from Fields, Planets and Moons within selected radius"
-      );
+      )];
     case "planets":
-      return rsshelp(
+      return [rsshelp(
         "This command shows best spots by total Resources from Planets and Moons within selected radius"
-      );
+      )];
     case "fields":
-      return rsshelp(
+      return [rsshelp(
         "This command shows best spots by total Resources from Fields within selected radius"
-      );
+      )];
     case "hsa":
-      return hsaHelp();
+      return [hsaHelp()];
     case "rtime":
-      return rtimeHelp();
+      return [rtimeHelp()];
     case "prospect":
-      return rsshelp(
+      return [rsshelp(
         "This command shows best spots by Total Resources from Prospect Inc. Mining Colony with Planet harvest 600% and Fields harvest 250%"
-      );
+      )];
     case "ships":
-      return shipshelp(
+      return [shipshelp(
         "This command shows you how much ships will you make with a maxed out HSA and lvl.10 MIC offices near m moons."
-      )
+      )];
     case "stn" :
-      return stnHelp();
+      return [stnHelp()];
     case "stns":
       return stnsHelp();
     case "map":
-      return mapHelp();
+      return [mapHelp()];
     default:
-      return `Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`;
+      return [`Help for command "${command}" hasn't been added yet, please contact feazeyu#9566 or Chobochobo#6702 for further help`];
   }
 }
 
@@ -212,7 +212,7 @@ function shipshelp(){
 }
 
 function stnsHelp(){
- let msg = `
+ let msgs = [`
  This command will return a list of the best station spots by rss or labor (if specified), with specifed outposts.
 
 Required args: 
@@ -228,7 +228,6 @@ Optional args:
     The results will show ONLY stations with HSA/CSA reduction equal or higher than <min_hsa_red>  
    
   station, MF, TP, MC, HD <radius> <harvest_rate>:
-   
     These options will change the <radius> and <harvest_rate> of specified outpost (or the stn itself). Example:
       
       MF 3 450
@@ -236,27 +235,21 @@ Optional args:
     will set <radius> of mining facilites to 3 and their <harvest_rate> to 450%
   
   sort "labor":
-    
-    Include this option to sort the results by labor, not by rss
+    Include this option to show top labor spots instead
 
   w <Metal> <Gas> <Crystal> <Labour>:
-
     The values are weights for each of those resources that are used for calculation of the value "total". The results are sorted by "total", unless "closest" is used
   
   closest:
-  
     add this to sort results by distance (still shows top "e" results)
 
   d <x> <y> <max_distance>:
-    
     Specifies the search area. Filters the results to show only stations with distance up to <max_distance> from the hex <x> <y> 
    
   e <entries>:
-    
-    Amount of entries to display.
+    Amount of entries to display.`,
   
-Default Values:
-    
+`Default Values:
   station: Radius 4 Harvest 73
   MF: Radius 1 Harvest 450
   TP: Radius 1 Harvest 400
@@ -276,8 +269,8 @@ Example of a command I'd use to make a Workshed station:
    use at least 6% HSA (m 6)
    have distance from hex /goto 0 10 up to 25 (d 0 10 25)
    only top 40 spots will be shown (e 40)
-`
- return msg;
+`]
+ return msgs;
 }
 
 function stnHelp(){

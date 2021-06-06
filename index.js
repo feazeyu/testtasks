@@ -130,7 +130,7 @@ function createBestStnMsg(data) {
   let end = Math.min(pageSize.rss * (data.pages.page + 1), data.maxEntries);
   for (x = begin; x < end; x++) {
     spots.push({
-      name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
+      name: (parseInt(data.harvest[x].rank) + 1) + ". " + data.harvest[x].coords.gotoCoords(),
       value: `${emoji.metal} ${Math.floor(data.harvest[x].MR)} | ${
         emoji.gas
       } ${Math.floor(data.harvest[x].GR)} | ${emoji.crystal} ${Math.floor(
@@ -165,7 +165,7 @@ function createBestSpotsMsg(data) {
   //console.log(end);
   for (x = begin; x < end; x++) {
     spots.push({
-      name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
+      name: (parseInt(data.harvest[x].rank) + 1) + ". " + data.harvest[x].coords.gotoCoords(),
       value: `${emoji.metal} ${Math.floor(data.harvest[x].MR)} | ${
         emoji.gas
       } ${Math.floor(data.harvest[x].GR)} | ${emoji.crystal} ${Math.floor(
@@ -204,7 +204,7 @@ function createBestHsaMsg(data) {
   //console.log(end);
   for (x = begin; x < end; x++) {
     spots.push({
-      name: x + 1 + ". " + data.harvest[x].coords.gotoCoords(),
+      name: data.harvest[x].rank + 1 + ". " + data.harvest[x].coords.gotoCoords(),
       value:
         " Moon Pts.: " +
         data.harvest[x].total +
@@ -624,11 +624,13 @@ client.on("message", (message) => {
     case "help":
       let helpMsg;
       if (args[2]) {
-        helpMsg = help.help(args[2]);
+        helpMsgs = help.help(args[2]);
       } else {
-        helpMsg = help.help("help");
+        helpMsgs = help.help("help");
       }
-      message.channel.send("```" + helpMsg + "```");
+      for(i in helpMsgs){
+        message.channel.send("```" + helpMsgs[i] + "```");
+      }
       break;
     case "rss": //RSS command
       parsedArgs = parseArgs(args, userConfig);

@@ -98,7 +98,9 @@ function bestTotalSpots(fnc, middle, distance, entries, args) {
   }
   spots.sort(comparatorTotal);
   spots = spots.slice(0, Math.min(entries, spots.length));
-  console.log(spots[0]);
+  for(i in spots){
+    spots[i].rank = i;
+  }
   if(args.closest){
     spots.sort(comparatorDist);
   }
