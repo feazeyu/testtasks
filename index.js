@@ -204,7 +204,7 @@ function createBestHsaMsg(data) {
   //console.log(end);
   for (x = begin; x < end; x++) {
     spots.push({
-      name: data.harvest[x].rank + 1 + ". " + data.harvest[x].coords.gotoCoords(),
+      name: (parseInt(data.harvest[x].rank) + 1) + ". " + data.harvest[x].coords.gotoCoords(),
       value:
         " Moon Pts.: " +
         data.harvest[x].total +

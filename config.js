@@ -3,7 +3,7 @@ const path = './config.txt';
 var config = {};
 
 let defaults = {
-    map: ["omega"],
+    map: ["thunderborne"],
 }
 
 function loadConfig(){

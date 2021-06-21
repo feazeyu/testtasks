@@ -88,6 +88,15 @@ function calculateOutpostProduction(outposts, options) {
         harvests[i].GR *= options.MC.harvestRate;
         harvests[i].CR *= options.MC.harvestRate;
       }
+      if(options.prospect){
+        harvests = mapCalcs.bestTotalSpots(
+          mapCalcs.atFuncs.prospectAt,
+          options.coords,
+          options.station.radius,
+          topSpotCount,
+          { radius: options.MC.radius, map: options.map }
+        );
+      }
       break;
     case "HD":
       harvests = mapCalcs.bestTotalSpots(
@@ -188,6 +197,11 @@ function loadOptions(args) {
   if (args.w) {
     options.sort = "weighted";
     options.weights = args.w;
+  }
+  if (args.prospect) {
+    options.prospect = true;
+  } else {
+    options.prospect = false;
   }
   //console.log(options);
   return options;

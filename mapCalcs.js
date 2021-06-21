@@ -108,38 +108,38 @@ function bestTotalSpots(fnc, middle, distance, entries, args) {
 }
 
 function prospectAt(coords, args) {
+  args.yields = {
+    planets: {
+      labor: 0,
+      rss: 7.59, //7.59 because 6.9 is base, * 1.10 for apex mining lasers, ikr. Weird
+    },
+    fields: {
+      labor: 0,
+      rss: 2.5,
+    },
+  };
   return rssYieldAt(
     coords,
     args,
-    {
-      planets: {
-        labor: 0,
-        rss: 7.59, //7.59 because 6.9 is base, * 1.10 for apex mining lasers, ikr. Weird
-      },
-      fields: {
-        labor: 0,
-        rss: 2.5,
-      },
-    },
   );
 }
 
-function rssYieldAt(coords, args, yields) {
+function rssYieldAt(coords, args) {
   let harvestPlanets = planetsAt(coords, args);
   let harvestFields = fieldsAt(coords, args);
   let yield = {
     LQ:
-      harvestFields.LQ * yields.fields.labor +
-      harvestPlanets.LQ * yields.planets.labor,
+      harvestFields.LQ * args.yields.fields.labor +
+      harvestPlanets.LQ * args.yields.planets.labor,
     MR:
-      harvestFields.MR * yields.fields.rss +
-      harvestPlanets.MR * yields.planets.rss,
+      harvestFields.MR * args.yields.fields.rss +
+      harvestPlanets.MR * args.yields.planets.rss,
     GR:
-      harvestFields.GR * yields.fields.rss +
-      harvestPlanets.GR * yields.planets.rss,
+      harvestFields.GR * args.yields.fields.rss +
+      harvestPlanets.GR * args.yields.planets.rss,
     CR:
-      harvestFields.CR * yields.fields.rss +
-      harvestPlanets.CR * yields.planets.rss,
+      harvestFields.CR * args.yields.fields.rss +
+      harvestPlanets.CR * args.yields.planets.rss,
   };
   yield.total = yield.MR + yield.GR + yield.CR;
   return yield;
