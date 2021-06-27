@@ -15,7 +15,7 @@ const commands = [
 
 function help(command) {
   if (!commands.includes(command)) {
-    return `Command ${command} doesn't exist`;
+    return [`Command ${command} doesn't exist`];
   }
   switch (command) {
     case "help":
@@ -120,7 +120,6 @@ optional arguments are:
         default values:
             e 50
 
-example command: !p 
 `;
 
   return msg;
@@ -337,7 +336,7 @@ Example command, that will set map to omega:
 
 !p map "omega"
 
-Default map for each user is "omega".
+Default map for each user is "thunderdome".
 
 `
 

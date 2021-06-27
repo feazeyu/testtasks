@@ -5,7 +5,7 @@ var hexArrays = {};
 const CellDefinitions = JSON.parse(
   fs.readFileSync("./resources/CELL_DEFINITIONS.json")
 );
-const validMaps = ["omega", "thunderdome"];
+const validMaps = ["omega", "thunderdome", "goldrush"];
 var CellDefinitionsDict = {};
 var rData = {};
 function initCellDefinitionDict() {

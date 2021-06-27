@@ -19,33 +19,11 @@ const emoji = {
   gas: "<:Gas:757976643204546618>",
   labor: "<:labor:839506095864676363>",
 };
-const exampleEmbed = new Discord.MessageEmbed()
-  .setColor("#0099ff")
-  .setTitle("Some title")
-  .setURL("https://discord.js.org/")
-  .setAuthor(
-    "Some name",
-    "https://i.imgur.com/wSTFkRM.png",
-    "https://discord.js.org"
-  )
-  .setDescription("Some description here")
-  .setThumbnail("https://i.imgur.com/wSTFkRM.png")
-  .addFields(
-    { name: "Regular field title", value: "Some value here" },
-    { name: "\u200B", value: "\u200B" },
-    { name: "Inline field title", value: "Some value here", inline: true },
-    { name: "Inline field title", value: "Some value here", inline: true }
-  )
-  .addField("Inline field title", "Some value here", true)
-  .setImage("https://i.imgur.com/wSTFkRM.png")
-  .setTimestamp()
-  .setFooter("Some footer text here", "https://i.imgur.com/wSTFkRM.png");
 const client = new Discord.Client(); // creates a discord client
 const token = fs.readFileSync("token.txt").toString();
 client.login(token);
 const prefix = "!p";
 const negativeIntegerErr = "```Yerr nuts, matey! Am not doing that```";
-const unknownCommandErr = "```Unrecognized command! Squawk!```"; //Error for unknown command
 function reqArgsOmmitedErr(command) {
   return (
     "```" +
@@ -420,7 +398,7 @@ function checkStnsArguments(args) {
   }
   if (args.w){
     while(args.w.length < 4){
-      args.w.psuh(0);
+      args.w.push(0);
     }
   }
 }
