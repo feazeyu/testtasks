@@ -1,6 +1,6 @@
 const mapCalcs = require("./mapCalcs.js");
 const hexMath = require("./hexMath.js");
-
+const validOutposts = ["MF", "TP", "MC", "HSA", "CSA", "HD"];
 const topSpotCount = 5;
 const defaults = {
   station: {
@@ -265,3 +265,4 @@ function calculateStn(args) {
 
 exports.calculateStn = calculateStn;
 exports.stnAt = stnAt;
+exports.validOutposts = validOutposts;

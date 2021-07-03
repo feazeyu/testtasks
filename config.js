@@ -3,7 +3,7 @@ const path = './config.txt';
 var config = {};
 
 let defaults = {
-    map: ["thunderborne"],
+    map: ["thunderdome"],
 }
 
 function loadConfig(){
