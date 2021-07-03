@@ -689,6 +689,18 @@ function validateOptions(parsedArgs, requiredOptions, optionalOptions) {
       return [unknownOptionError(keyword)];
     }
   }
+  for (keyword in parsedArgs) {
+    err = validateOptionArgumentTypes(keyword, parsedArgs[keyword]);
+    if (err) {
+      return [err, "```" + options[keyword].fullDescription + "```"];
+    }
+  }
+  for (keyword in parsedArgs) {
+    err = options[keyword].validator(parsedArgs);
+    if (err) {
+      return [err, "```" + options[keyword].fullDescription + "```"];
+    }
+  }
   for (i in requiredOptions){
     keyword = requiredOptions[i];
     if(!(keyword in parsedArgs)){
