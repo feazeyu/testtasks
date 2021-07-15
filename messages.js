@@ -96,6 +96,80 @@ function createBestStnMsg(data) {
     .addFields(spots);
 }
 
+function fleetPlannerMsgEmbd(data) {
+  return new Discord.MessageEmbed()
+    .setColor(data.info.color)
+    .setTitle(data.info.userName)
+    .setThumbnail(data.info.avatar)
+    .addFields(
+      {name: "Role", value: data.info.role, inline: true},
+      {name: "Group", value: data.info.group, inline: true},
+    )
+    .addField('\u200b', '\u200b')
+    .addFields(
+      { name: "Indies", value: data.info.units.industrial, inline: true },
+      { name: "Gunships", value: data.info.units.gunship, inline: true },
+      { name: "TCs", value: data.info.units.tc, inline: true },
+      { name: "Vettes", value: data.info.units.corvette, inline: true },
+      { name: "Patrols", value: data.info.units.patrol, inline: true },
+      { name: "Scouts", value: data.info.units.scout, inline: true },
+      { name: "Dessies", value: data.info.units.destroyer, inline: true },
+      { name: "Frigs", value: data.info.units.frigate, inline: true },
+      { name: "Recons", value: data.info.units.recon, inline: true },
+      { name: "Carriers", value: data.info.units.carrier, inline: true },
+      { name: "Dreads", value: data.info.units.dreadnought, inline: true },
+      { name: '\u200b', value: '\u200b', inline: true },
+      );
+    //.setFooter("\u3000".repeat(10 /*any big number works too*/) + "|");
+}
+
+function normalizeLength(text, length) {
+  return (text + "                                   ").slice(0, length);
+}
+
+function fleetPlannerMsgTxt(data) {
+  return (
+    "```" +
+    `
+  ${normalizeLength(data.info.userName, 25)} role: ${normalizeLength(
+      data.info.role,
+      25
+    )} group: ${normalizeLength(data.info.group, 25)}
+  Vettes    Patrols   Scouts    Indies    Dessies   Frigs     Recons    Gunships  Carriers  Dreads    TCs
+  ${normalizeLength(data.info.units.corvette, 10)}${normalizeLength(
+      data.info.units.patrol,
+      10
+    )}${normalizeLength(data.info.units.scout, 10)}${normalizeLength(
+      data.info.units.industrial,
+      10
+    )}${normalizeLength(data.info.units.destroyer, 10)}${normalizeLength(
+      data.info.units.frigate,
+      10
+    )}${normalizeLength(data.info.units.recon, 10)}${normalizeLength(
+      data.info.units.gunship,
+      10
+    )}${normalizeLength(data.info.units.carrier, 10)}${normalizeLength(
+      data.info.units.dreadnought,
+      10
+    )}${normalizeLength(data.info.units.tc)}` +
+    "```"
+  );
+}
+
+function textEntry(text, channel) {
+  return new Entry(
+    {
+      text: [text],
+      pages: {
+        page: 0,
+        limit: 1,
+      },
+    },
+    textOnly,
+    channel
+  );
+}
+
 function createBestSpotsMsg(data) {
   let spots = [];
   let begin = pageSize.rss * data.pages.page;
@@ -176,15 +250,15 @@ function createBestHsaMsg(data) {
     .addFields(spots);
 }
 
-function generateHelpFromDescriptions(command, channel) {
+function generateHelpFromDescriptions(namespace, command, channel) {
   entries = [];
   entries.push(
     new Entry(
       {
         text: [
-          Commands.commands[command].description +
+          Commands.commands[namespace][command].description +
             "\n\tExample:\n\t" +
-            Commands.commands[command].example +
+            Commands.commands[namespace][command].example +
             "\nRequired options:",
         ],
         pages: {
@@ -196,7 +270,7 @@ function generateHelpFromDescriptions(command, channel) {
       channel
     )
   );
-  if (Commands.commands[command].requiredOptions.length == 0) {
+  if (Commands.commands[namespace][command].requiredOptions.length == 0) {
     entries.push(
       new Entry(
         {
@@ -211,8 +285,8 @@ function generateHelpFromDescriptions(command, channel) {
       )
     );
   } else {
-    for (i in Commands.commands[command].requiredOptions) {
-      let option = Commands.commands[command].requiredOptions[i];
+    for (i in Commands.commands[namespace][command].requiredOptions) {
+      let option = Commands.commands[namespace][command].requiredOptions[i];
       entries.push(
         new Entry(
           {
@@ -248,7 +322,7 @@ function generateHelpFromDescriptions(command, channel) {
       channel
     )
   );
-  if (Commands.commands[command].optionalOptions.length == 0) {
+  if (Commands.commands[namespace][command].optionalOptions.length == 0) {
     entries.push(
       new Entry(
         {
@@ -263,8 +337,8 @@ function generateHelpFromDescriptions(command, channel) {
       )
     );
   } else {
-    for (i in Commands.commands[command].optionalOptions) {
-      let option = Commands.commands[command].optionalOptions[i];
+    for (i in Commands.commands[namespace][command].optionalOptions) {
+      let option = Commands.commands[namespace][command].optionalOptions[i];
       entries.push(
         new Entry(
           {
@@ -296,9 +370,9 @@ class Entry {
     this.createMsgFnc = createMsgFnc;
     this.channel = channel;
   }
-  sendMsg() {
+  async sendMsg() {
     let msg = this.createMsgFnc(this.data);
-    this.channel.send(msg).then((lastMessage) => {
+    await this.channel.send(msg).then((lastMessage) => {
       if (this.data.pages.limit > 1) {
         lastMessage.react("◀️").then(() => lastMessage.react("▶️"));
       }
@@ -363,5 +437,8 @@ exports.createStationMessage = createStationMessage;
 exports.textOnly = textOnly;
 exports.textNoFormat = textNoFormat;
 exports.mapHelp = mapHelp;
+exports.textEntry = textEntry;
 exports.entryDict = entryDict;
 exports.pageSize = pageSize;
+exports.fleetPlannerMsgTxt = fleetPlannerMsgTxt;
+exports.fleetPlannerMsgEmbd = fleetPlannerMsgEmbd;

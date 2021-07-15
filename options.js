@@ -117,7 +117,6 @@ options = {
     `,
     argumentTypes: [
       ["int", "int", "uint"],
-      ["int", "int"],
     ],
     validator: function (args) {
       if (args.d[2] >= 2 * mapCalcs.maps[args.map[0]].MapRadius) {
@@ -641,11 +640,51 @@ options = {
       };
     },
   },
+  id: {
+    description: "User's id that is target of a command",
+    fullDescription: `
+    Usage:
+    id <user_id>
+
+    <user_id> shall be valid positive integer.
+
+    Example:
+    id 306470357659811840
+
+    `,
+    argumentTypes: [["uint"]],
+    validator: function(args){
+      return;
+    },
+    setDefaults: function(args){
+      return;
+    },
+  },
+  mention: {
+    description: "mention of a user that is target of a command",
+    fullDescription: `
+    Usage:
+    mention "<@user>"
+
+    <@user> shall be valid user mention.
+    <@user> is passed as a string and shall be surrounded by commas "".
+
+    Example:
+    mention "@Chobochobo"
+
+    `,
+    argumentTypes: [["str"]],
+    validator: function(args){
+      return;
+    },
+    setDefaults: function(args){
+      return;
+    },
+  }
 };
 
 function fitArgsTypes(args, argTypes) {
   for (i in argTypes) {
-    console.log(argTypes[i]);
     argTypeCheck[argTypes[i]](args[i]); //throws error whenever type of args[i] doesn't match argTypes[i]
   }
 }
