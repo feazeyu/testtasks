@@ -15,6 +15,8 @@ const aliases = {
   "scout": "scouts",
   "dessies": "destroyers",
   "destroyer": "destroyers",
+  "destros": "destroyers",
+  "destro": "destroyers",
   "frig": "frigates",
   "frigs": "frigates",
   "frigate": "frigates",
