@@ -5,6 +5,30 @@ const Config = require("./config");
 
 var config = {};
 
+const aliases = {
+  "vette": "corvettes",
+  "vetttes": "corvettes",
+  "corvette": "corvettes",
+  "patrol": "patrols",
+  "scout": "scouts",
+  "dessies": "destroyers",
+  "destroyer": "destroyers",
+  "frig": "frigates",
+  "frigs": "frigates",
+  "frigate": "frigates",
+  "recon": "recons",
+  "carrier": "carriers",
+  "dread": "dreadnoughts",
+  "dreads": "dreadnoughts",
+  "dreadnought": "dreadnoughts",
+  "tc": "tcs",
+  "indie": "industrials",
+  "indies": "industrials",
+  "industrial": "industrials",
+  "gunship": "gunships",
+  "gs": "gunships",
+}
+
 function defaults() {
   return {
     userName: "unknown username",
@@ -542,3 +566,4 @@ exports.commands = commands;
 exports.initChannel = initChannel;
 exports.deleteChannel = deleteChannel;
 exports.loadConfig = loadConfig;
+exports.aliases = aliases;

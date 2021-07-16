@@ -129,7 +129,11 @@ function fleetHandle(message) {
     let userConfig = config.getUserPreferences(message.author);
     let args = commands[i].split(" ");
     let parsedArgs = parseArgs(args, userConfig, 1);
-    Commands.runCommand("fleet", args[0], parsedArgs, message);
+    let cmd = args[0].toLowerCase();
+    if(cmd in FleetPlanner.aliases){
+      cmd = FleetPlanner.aliases[args[0]]
+    }
+    Commands.runCommand("fleet", cmd, parsedArgs, message);
   }
 }
 
