@@ -201,7 +201,7 @@ const commands = {
             message.channel,
             message.author,
             "corvette",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -225,7 +225,7 @@ const commands = {
             message.channel,
             message.author,
             "patrol",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -249,7 +249,7 @@ const commands = {
             message.channel,
             message.author,
             "scout",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -273,7 +273,7 @@ const commands = {
             message.channel,
             message.author,
             "industrial",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -297,7 +297,7 @@ const commands = {
             message.channel,
             message.author,
             "destroyer",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -321,7 +321,7 @@ const commands = {
             message.channel,
             message.author,
             "frigate",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -345,7 +345,7 @@ const commands = {
             message.channel,
             message.author,
             "recon",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -369,7 +369,7 @@ const commands = {
             message.channel,
             message.author,
             "gunship",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -393,7 +393,7 @@ const commands = {
             message.channel,
             message.author,
             "tc",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -417,7 +417,7 @@ const commands = {
             message.channel,
             message.author,
             "carrier",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
@@ -441,7 +441,7 @@ const commands = {
             message.channel,
             message.author,
             "dreadnought",
-            parseInt(validatedArgs.base[0])
+            validatedArgs.base.reduce((a, b) => a + b, 0)
           ),
           message.channel
         ),
