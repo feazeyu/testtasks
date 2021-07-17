@@ -646,15 +646,18 @@ options = {
     Usage:
     id <user_id>
 
-    <user_id> shall be valid positive integer.
+    <user_id> shall be valid id
+    <user_id> is passed as a string and shall be surrounded by commas ""
 
     Example:
-    id 306470357659811840
+    id "306470357659811840"
 
     `,
-    argumentTypes: [["uint"]],
+    argumentTypes: [["str"]],
     validator: function(args){
-      return;
+      if(typeof args.id[0] != "string"){
+        return "```This wayy we would have rrrounding errors, confusing users! pass it as string!```";
+      }
     },
     setDefaults: function(args){
       return;

@@ -59,6 +59,7 @@ function parseArgs(args, defaults, start) {
       } else {
         value = value.slice(0, -1);
       }
+      value = value.trim();
     } else {
       argKey = args[i];
       argDict[argKey] = [];

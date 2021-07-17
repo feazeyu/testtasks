@@ -1,1 +1,72 @@
-{"1":{"userName":"TestUser","permissionLevel":"pirate","preferences":{"map":["omega"]}},"306470357659811840":{"userName":"Chobochobo","permissionLevel":"captain","preferences":{"map":["goldrush"]}},"361868132047912960":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"746258744928763954":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"268390562313273344":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"678344240757211147":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["goldrush"]}},"802558784652181505":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"184008773424250881":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["goldrush"]}},"464116804524965908":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"516056022066921472":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"608495214188953600":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"277226160155262976":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["thunderdome"]}},"705666331370061835":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["goldrush"]}},"295378294407168002":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["goldrush"]}},"337602946755985409":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["goldrush"]}},"214064119421206529":{"userName":"unknown username","permissionLevel":"pirate","preferences":{"map":["goldrush"]}},"838492442545356880":{"userName":"Parrot Advisor","permissionLevel":"human","preferences":{"map":["thunderdome"]}}}
+{
+  "1": {
+    "userName": "TestUser",
+    "permissionLevel": "admin",
+    "preferences": { "map": ["omega"] }
+  },
+  "306470357659811840": {
+    "userName": "Chobochobo",
+    "permissionLevel": "captain",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "361868132047912960": {
+    "userName": "feazeyu",
+    "permissionLevel": "captain",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "268390562313273344": {
+    "userName": "AllCoastal",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["thunderdome"] }
+  },
+  "678344240757211147": {
+    "userName": "Afreeq",
+    "permissionLevel": "captain",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "802558784652181505": {
+    "userName": "Proxima",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "184008773424250881": {
+    "userName": "Baika-_-",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "464116804524965908": {
+    "userName": "TheNothingness",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "705666331370061835": {
+    "userName": "Axxon",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "295378294407168002": {
+    "userName": "chessznerd",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "337602946755985409": {
+    "userName": "daisho kekw",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "214064119421206529": {
+    "userName": "The Gozerian",
+    "permissionLevel": "pirate",
+    "preferences": { "map": ["goldrush"] }
+  },
+  "226792885436022784": {
+    "userName": "SabermanGaming",
+    "permissionLevel": "human",
+    "preferences": { "map": ["thunderdome"] }
+  },
+  "723225909833891965": {
+    "userName": "RabidClown",
+    "permissionLevel": "human",
+    "preferences": { "map": ["thunderdome"] }
+  }
+}

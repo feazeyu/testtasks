@@ -86,7 +86,7 @@ function getUserById(id) {
 }
 
 function getUserByMention(mentionString) {
-  return getUserById(parseInt(mentionString.slice(3, -1)));
+  return getUserById(mentionString.slice(3, -1));
 }
 
 function getAllUserIds() {
