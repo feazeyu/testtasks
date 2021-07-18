@@ -82,7 +82,21 @@ client.on("message", (message) => {
   ) {
     selfTest(message);
   }
-  handleMsg(message) || fleetHandle(message);
+  try{
+    handleMsg(message) || fleetHandle(message);
+  } catch (err){
+    message.channel.send("```An error occurred durning command execution. The problem is being reported to the devs!```");
+    message.channel.send("```" + err + "```");
+    message.channel.send(Messages.confusionText);
+    console.log("-----ERROR-----");
+    console.log("message content:");
+    console.log(message.content);
+    console.log("User:");
+    console.log(message.author.username);
+    console.log("User ID:");
+    console.log(message.author.id);
+    console.log("-----END-----");
+  }
 });
 
 function handleMsg(message) {

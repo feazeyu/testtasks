@@ -21,6 +21,21 @@ function textNoFormat(data) {
   return data.text[data.pages.page];
 }
 
+const confusionText = `
+*Parrot starts to look around looking very confused*
+...
+What the scally sea bass! The stoopid pirrates didn't give me manual for this one!
+Call for help swabbie!!
+*Swabbie rings the bell*
+<@306470357659811840> <@306470357659811840> <@306470357659811840> <@306470357659811840>
+...
+Once more swabbie!
+<@306470357659811840>
+Perrrfect!
+  
+Feel free to use other commands, but this one seems broken at the moment!
+             `;
+
 function createStationMessage(data) {
   let spots = [];
   let begin = pageSize.stn * data.pages.page;
@@ -442,3 +457,4 @@ exports.entryDict = entryDict;
 exports.pageSize = pageSize;
 exports.fleetPlannerMsgTxt = fleetPlannerMsgTxt;
 exports.fleetPlannerMsgEmbd = fleetPlannerMsgEmbd;
+exports.confusionText = confusionText;
