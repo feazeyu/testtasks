@@ -633,7 +633,7 @@ will return ${DHMSTimeString(returnTime)}`;
 
   if ("sg" in args && args.sg.length >= 1) {
     let travelTimeSecondsWithSGBug = Math.floor(
-      (distance * 3600) / (speed + args.sg[0]) + hexMath.eps
+      (distance * 3600) / (speed + args.sg[0]) + HexMath.eps
     );
     let travelTimeWithSGBug = timeSecsToDHMS(travelTimeSecondsWithSGBug);
     let returnTimeSecondsWithSGBug =
