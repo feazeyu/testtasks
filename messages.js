@@ -13,6 +13,21 @@ const emoji = {
 
 const pageSize = { rss: 10, stn: 5 };
 
+const suffixes = ["", " K", " M", " G", " T"];
+function fancyNumberString(number){
+  let i = 0;
+  let n = number;
+  while(n >= 1000){
+    i++;
+    n /= 1000;
+  }
+  if(n >= 100){
+    return n.toString().slice(0, 3) + suffixes[i];
+  } else {
+    return n.toString().slice(0, 4) + suffixes[i];
+  }
+}
+
 function textOnly(data) {
   return "```" + data.text[data.pages.page] + "```";
 }
@@ -117,10 +132,10 @@ function fleetPlannerMsgEmbd(data) {
     .setTitle(data.info.userName)
     .setThumbnail(data.info.avatar)
     .addFields(
-      {name: "Role", value: data.info.role, inline: true},
-      {name: "Group", value: data.info.group, inline: true},
+      { name: "Role", value: data.info.role, inline: true },
+      { name: "Group", value: data.info.group, inline: true }
     )
-    .addField('\u200b', '\u200b')
+    .addField("\u200b", "\u200b")
     .addFields(
       { name: "Indies", value: data.info.units.industrial, inline: true },
       { name: "Gunships", value: data.info.units.gunship, inline: true },
@@ -133,9 +148,14 @@ function fleetPlannerMsgEmbd(data) {
       { name: "Recons", value: data.info.units.recon, inline: true },
       { name: "Carriers", value: data.info.units.carrier, inline: true },
       { name: "Dreads", value: data.info.units.dreadnought, inline: true },
-      { name: '\u200b', value: '\u200b', inline: true },
-      );
-    //.setFooter("\u3000".repeat(10 /*any big number works too*/) + "|");
+      { name: "\u200b", value: "\u200b", inline: true }
+    )
+    .addField("\u200b", "\u200b")
+    .addFields(
+      { name: "average FP", value: fancyNumberString(data.info.stats.FP), inline: true },
+      { name: "average HP", value: fancyNumberString(data.info.stats.HP), inline: true }
+    );
+  //.setFooter("\u3000".repeat(10 /*any big number works too*/) + "|");
 }
 
 function normalizeLength(text, length) {

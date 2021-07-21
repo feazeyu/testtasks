@@ -1,38 +1,40 @@
 const fs = require("fs");
 const path = "./fleetData.json";
+const unitStatsPath = "./resources/unitStats.json";
 const Messages = require("./messages");
 const Config = require("./config");
 
 var config = {};
+var unitStats = {};
 
 const aliases = {
-  "vette": "corvettes",
-  "vetttes": "corvettes",
-  "corvette": "corvettes",
-  "patrol": "patrols",
-  "pat": "patrols",
-  "pats": "patrols",
-  "scout": "scouts",
-  "dessies": "destroyers",
-  "destroyer": "destroyers",
-  "destros": "destroyers",
-  "destro": "destroyers",
-  "frig": "frigates",
-  "frigs": "frigates",
-  "frigate": "frigates",
-  "recon": "recons",
-  "carrier": "carriers",
-  "dreds": "dreadnoughts",
-  "dread": "dreadnoughts",
-  "dreads": "dreadnoughts",
-  "dreadnought": "dreadnoughts",
-  "tc": "tcs",
-  "indie": "industrials",
-  "indies": "industrials",
-  "industrial": "industrials",
-  "gunship": "gunships",
-  "gs": "gunships",
-}
+  vette: "corvettes",
+  vettes: "corvettes",
+  corvette: "corvettes",
+  patrol: "patrols",
+  pat: "patrols",
+  pats: "patrols",
+  scout: "scouts",
+  dessies: "destroyers",
+  destroyer: "destroyers",
+  destros: "destroyers",
+  destro: "destroyers",
+  frig: "frigates",
+  frigs: "frigates",
+  frigate: "frigates",
+  recon: "recons",
+  carrier: "carriers",
+  dreds: "dreadnoughts",
+  dread: "dreadnoughts",
+  dreads: "dreadnoughts",
+  dreadnought: "dreadnoughts",
+  tc: "tcs",
+  indie: "industrials",
+  indies: "industrials",
+  industrial: "industrials",
+  gunship: "gunships",
+  gs: "gunships",
+};
 
 function defaults() {
   return {
@@ -49,6 +51,10 @@ function defaults() {
       tc: 0,
       carrier: 0,
       dreadnought: 0,
+    },
+    stats: {
+      FP: 0,
+      HP: 0,
     },
     role: "unknown",
     group: "default",
@@ -79,6 +85,8 @@ async function resendAll(channel) {
   config[channel.id]["msg"] = [];
   for (userID in config[channel.id]["usr"]) {
     config[channel.id]["usr"][userID].msgID = "-1";
+    config[channel.id]["usr"][userID].stats = calculateStats(config[channel.id]["usr"][userID].units); //TODO remove, fix to update old planners
+    saveConfig();
     await updateMessage(channel, { id: userID });
   }
   await clearMessages(channel);
@@ -91,6 +99,7 @@ function updateUserName(channel, user) {
 
 function loadConfig() {
   config = JSON.parse(fs.readFileSync(path));
+  unitStats = JSON.parse(fs.readFileSync(unitStatsPath));
 }
 
 function saveConfig() {
@@ -124,6 +133,18 @@ function checkUserConf(channel, user) {
   }
   updateUserName(channel, user);
   saveConfig();
+}
+
+function calculateStats(units) {
+  let FP = 0;
+  let HP = 0;
+  for (unit in units) {
+    if (unit in unitStats) {
+      FP += unitStats[unit].average.UNIT_FIREPOWER * units[unit];
+      HP += unitStats[unit].average.UNIT_HP * units[unit];
+    }
+  }
+  return { FP: FP, HP: HP };
 }
 
 async function updateMessage(channel, user) {
@@ -176,6 +197,10 @@ function setUnits(channel, user, unit, count) {
   }
   checkUserConf(channel, user);
   config[channel.id]["usr"][user.id].units[unit] = count;
+  let stats = calculateStats(config[channel.id]["usr"][user.id].units);
+  config[channel.id]["usr"][user.id].stats.FP = stats.FP;
+  config[channel.id]["usr"][user.id].stats.HP = stats.HP;
+
   saveConfig();
   updateMessage(channel, user);
   clearMessages(channel);
