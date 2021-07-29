@@ -82,6 +82,7 @@ client.on("message", (message) => {
   ) {
     selfTest(message);
   }
+  //handleMsg(message) || fleetHandle(message);
   try{
     handleMsg(message) || fleetHandle(message);
   } catch (err){

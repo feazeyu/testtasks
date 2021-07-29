@@ -329,7 +329,7 @@ options = {
       }
     },
     setDefaults: function (args) {
-      if (!("m" in args || args.m.length < 1)) {
+      if (!("m" in args) || args.m.length < 1) {
         args.m = [0];
       }
     },
