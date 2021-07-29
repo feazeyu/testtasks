@@ -543,6 +543,7 @@ function bestSpotCommand(channel, args, f, textData, msgGenFnc) {
       radius: args.r[0],
       map: args.map[0],
       closest: args.closest,
+      w: args.w,
     }
   );
 

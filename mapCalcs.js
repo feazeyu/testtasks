@@ -163,6 +163,7 @@ function rssAt(coords, args) {
     GR: data["1"].GR + data["2"].GR,
     CR: data["1"].CR + data["2"].CR,
   };
+  console.log(args);
   HarvestValue["total"] = HarvestValue.MR + HarvestValue.GR + HarvestValue.CR;
   return HarvestValue;
 }
