@@ -1,0 +1,188 @@
+<script>
+// 1. Please write a function that shows the usage of closures
+function hello(){
+    let message = "Hello world!"
+
+    function speak(){
+        console.log(message);
+    }
+    speak();
+}
+hello();
+// 2. Please write a function that returns a sum of array items
+// example input [9, 1, 22, 0, 2]
+// example output 34
+function sum(array){
+    let buffer = 0;
+    for(element in array){
+        if(!isNaN(parseInt(array[element]))){
+        buffer += parseInt(array[element])
+        } else {
+            return "error: Inputted array contains something else than a number!";  
+        }
+    }
+    return buffer;
+}
+console.log(sum(["9", 1, 22, 0, 2]));
+console.log(sum([9, 1, 22, 0, 2, "A cat"]));
+
+// 3. Please write a recursive function that flattens a list of items
+// example input [[2, [4, [44,5,6]]], [4,5,6], [[2,4], 4], 5]  ] <--- this one is extra
+// example output [2, 4, 44, 5, 6, 4, 5, 6, 2, 4, 4, 5]
+
+function flatten(array){
+    const buffer = [];
+    
+    for(i in array){
+        if(Array.isArray(array[i])){  //If is array, return an array with one less level, over and over again, until it isn't an array
+            buffer.push(...flatten(array[i])) 
+        }else{
+            buffer.push(array[i]);            
+        }
+    }
+    return buffer;
+}
+console.log(flatten([[2, [4, [44,5,6]]], [4,5,6], [[2,4], 4], 5]))
+
+// 4. Please write a function that finds all common elements of two arrays(only primitive types as array elements, order doesn't matter)
+// example inputs ['b', 3, 4, 76, 'c'], ['a', 'b', 4, 76, 21, 'e']
+// example output ['b', 4, 76]
+function similiar(arr1, arr2){
+    let buffer = []
+    for(i in arr1){
+        if(arr2.indexOf(arr1[i]) !== -1){
+            buffer.push(arr1[i])
+        }
+    }
+    return buffer
+}
+console.log(similiar(['b', 3, 4, 76, 'c'], ['a', 'b', 4, 76, 21, 'e']))
+
+// 5. Please write a function that finds all different elements of two arrays(only primitive types as array elements, order doesn't matter)
+// example inputs ['b', 3, 4, 76, 'c'], ['a', 'b', 4, 76, 21, 'e']
+// example output ['a', 3, 21, 'c', 'e']
+function different(arr1, arr2){
+    let buffer = []
+    for(i in arr1){
+        if(arr2.indexOf(arr1[i]) === -1){
+            buffer.push(arr1[i])
+        }
+    }
+    for(i in arr2){
+        if(arr1.indexOf(arr2[i]) === -1){
+            buffer.push(arr2[i])
+        }
+    }
+    return buffer
+}
+console.log(different(['b', 3, 4, 76, 'c'], ['a', 'b', 4, 76, 21, 'e']))
+// 6. Please write a function that takes two arrays of items and returns an array of tuples made from two input arrays at the same indexes. Excessive items should be dropped.
+// example input [1,2,3], [4,5,6,7]
+// example output [[1,4], [2,5], [3,6]]
+function tupler(arr1, arr2){
+    let buffer = []
+    if(arr1.length > arr2.length){
+        for(let i = 0; i < arr2.length; i++){
+            buffer.push([arr1[i], arr2[i]])
+        }
+    } else {
+        for(let i = 0; i < arr1.length; i++){
+            buffer.push([arr1[i], arr2[i]])
+        }
+    }
+    return buffer
+}
+console.log(tupler([1,2,3], [4,5,6,7]))
+// 7. Please write a function which takes a path(path is an array of keys) and object, then returns value at this path. If value at path doesn't exists, return undefined.
+// example inputs ['a', 'b', 'c', 'd'], { a: { b: { c: { d: '23' } } } }
+// example output '23'
+function followPath(path, obj){
+    if(typeof(obj) === "object"){
+        let step = path.shift();
+        if(path.length===0){
+            return obj[step]
+        }
+        return followPath(path, obj[step]);
+    }
+    return "Not an object, what are you trying to accomplish?"
+}
+console.log(followPath(['a', 'b', 'c', 'd'], { a: { b: { c: { d: '23' } } } }))
+// 8. Please write compare function which compares 2 objects for equality.
+// example input { a: 'b', c: 'd' }, { c: 'd', a: 'b' }  /// output true
+// example input { a: 'c', c: 'a' }, { c: 'd', a: 'b', q: 's' }  /// output false
+
+//This essentially looks at differences, if it finds a difference, return false. If it doesn't return true
+function compareObjects(obj1, obj2, mirror = 1){
+    let keys1 = Object.keys(obj1);
+    for(i in keys1){
+        if(typeof(obj1[keys1[i]]) === "object"){ //Check for nested objects
+            try{
+            if(!compareObjects(obj1[keys1[i]], obj2[keys1[i]])){ //Dive deeper, if false: return false, else continue comparing
+                return false;
+            }
+            } catch(e){ //An error is thrown when something is undefined => not equal
+                return false;
+            }
+        } else if(obj1[keys1[i]] !== obj2[keys1[i]]){ //If not object, compare simple values.
+            return false;
+        }
+    }
+    if(mirror === 1){ //Check the other way around, I am checking if an object contains all of the first one's keys and values, not if it contains extra
+       return compareObjects(obj2, obj1, 0)
+    }
+    return true;
+}
+
+//Tests ahead
+console.log(compareObjects({ a: 'b', c: 'd' }, { c: 'd', a: 'b' }));
+console.log(compareObjects({ a: 'c', c: 'a', d: '1'}, { c: 'a', a: 'c', d: 1 })); //Should this return true? If so, just compare after adding toString() to each side of the if
+console.log(compareObjects({a: 'b', object: {a: 'b', b: 'c'}},{object: {a: 'b', b: 'c'}, a:'b'}))
+console.log(compareObjects({array: [1,2,3], a:'b'},{a:'b', array:[1,3,2]})) //Order matters for arrays, if it didn't array.sort() would sort it out
+console.log(compareObjects({
+    name: 'MCHw',
+    skills: [
+        'Problem solving',
+        ['Overlooking', 'edge', 'cases'],
+        'Playing guitar decently',
+    ],
+    isFunny: false,
+    personObject: {
+        hair: 'blonde',
+        eyes: 'gray',
+        spokenLanguages: ['czech', 'english', 'spanish']
+    }
+},{
+    name: 'MCHw',
+    skills: [
+        'Problem solving',
+        ['Overlooking', 'edge', /*'cases'*/], //<--- If you remove this comment it will be equal and return true correctly 
+        'Playing guitar decently',
+    ],
+    isFunny: false,
+    personObject: {
+        hair: 'blonde',
+        eyes: 'gray',
+        spokenLanguages: ['czech', 'english', 'spanish']
+    }
+}))
+//Tests over
+
+// 9. Please write a function which takes a list of keys and an object, then returns this object, just without keys from the list
+// example input ['color', 'size'], { color: 'Blue', id: '22', size: 'xl' }
+// example output { id: '22' }
+
+function cropObject(cropArr, obj){
+    let bufferObj = {};
+    let keys = Object.keys(obj);
+    for(key in keys){
+        keyName = keys[key];
+        if(!cropArr.includes(keyName)){
+            bufferObj[keyName] = obj[keyName]
+        };
+    }
+    return bufferObj;
+}
+//I don't exactly know how to handle nested objects here, precisely how would the array tell me to for example crop 'value1' from {values: {value1:1}, value1: 2} 
+
+console.log(cropObject(['color', 'size'], { color: 'Blue', id: '22', size: 'xl' }));
+</script>
